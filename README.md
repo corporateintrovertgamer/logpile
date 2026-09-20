@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/social-preview.png" alt="Logpile Banner" width="100%">
+</p>
+
 # Logpile Desktop — Version 1.0.0
 
 An offline-first, local game library manager designed to organize, catalog, and launch your personal game collection across multiple launchers and standalone directories.
