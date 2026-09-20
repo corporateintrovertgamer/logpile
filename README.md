@@ -21,7 +21,7 @@ Logpile is built for gamers who want a clean, unified interface for their entire
 
 ## Installation
 
-1. Download the latest installer: `Logpile Setup 1.0.0.exe`.
+1. Download the latest installer: `Logpile.Setup.1.0.0.exe`.
 2. Run the installer and follow the setup wizard.
 3. **Important Security Notice**:
    > *Note: Because Logpile is an unsigned open-source application, Windows SmartScreen may flag the installer. Click "More info" and then "Run anyway" to proceed.*
