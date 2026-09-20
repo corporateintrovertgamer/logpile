@@ -13,6 +13,32 @@ An offline-first, local game library manager designed to organize, catalog, and 
 
 Logpile is built for gamers who want a clean, unified interface for their entire library without corporate launchers getting in the way. Whether your games come from Steam, Epic Games, GOG, or standalone DRM-free installers, Logpile brings them together in one place with rich artwork and metadata.
 
+## 📸 Gallery
+
+### Unified Library View
+Bring your Steam, Epic, and GOG libraries together in one clean, distraction-free grid. 
+<img width="1024" height="550" alt="Library installed page" src="https://github.com/user-attachments/assets/6357369f-d533-44d3-87ce-138af1d82aa6" />
+
+
+### Cinematic Game Details
+Rich metadata, beautiful widescreen backdrops, and seamless launching directly from the app
+<img width="1024" height="550" alt="RDR 2" src="https://github.com/user-attachments/assets/c00f0f72-f0db-4781-94fa-551053df8218" />
+<img width="1024" height="550" alt="Star wars Jedi" src="https://github.com/user-attachments/assets/3a1722ad-b6ab-4a49-969a-f06dd682404d" />
+
+
+### Intelligent Discovery
+Find what to play next with built-in genre and franchise recommendations.
+<img width="1920" height="1032" alt="Same frenchise or series" src="https://github.com/user-attachments/assets/79af5db0-1371-4479-871c-6c37656c489a" />
+<img width="1920" height="1032" alt="Realted genre recommendations" src="https://github.com/user-attachments/assets/10e9ceeb-c710-42ba-98fb-3b0fe8a5cae5" />
+
+
+### Today's Pick
+Can't decide? Let the local roulette wheel pick a random game from your backlog.
+<img width="1920" height="1032" alt="Todays pick result" src="https://github.com/user-attachments/assets/72bfe8c7-c6e9-4bd7-a6db-5d6e56b6386b" />
+<img width="1024" height="550" alt="Todays pick" src="https://github.com/user-attachments/assets/5e5748ba-9b44-4241-b259-1e2d72a0faea" />
+
+---
+
 ### Key Features
 
 - **Offline-First & Private**: All data is stored locally in an embedded SQLite database. No telemetry, no background tracking, and no account required to use it (free API keys are optional, for extra artwork and metadata). The app only goes online to fetch artwork and metadata from SteamGridDB, IGDB, and Steam's image servers.
