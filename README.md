@@ -1,6 +1,7 @@
-<p align="center">
-  <img src="docs/social-preview.png" alt="Logpile Banner" width="100%">
-</p>
+<img width="1146" height="640" alt="Large banner for app" src="https://github.com/user-attachments/assets/b352518f-7f4a-4686-b213-8b2b35b36fa4" />
+
+
+
 
 # Logpile Desktop — Version 1.0.0
 
