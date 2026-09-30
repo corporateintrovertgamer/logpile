@@ -1,9 +1,9 @@
 ========================================================================
-LOGPILE DESKTOP - VERSION 1.0.0
+LOGPILE DESKTOP - VERSION 1.1.0
 An offline-first, local game library manager
 ========================================================================
 
-Welcome to Logpile Desktop v1.0.0!
+Welcome to Logpile Desktop v1.1.0!
 
 Logpile is a fast, lightweight, and offline-first personal game launcher
 and collection organizer. It scans your local drives for games installed 
@@ -14,7 +14,7 @@ single, distraction-free interface.
 ------------------------------------------------------------------------
 INSTALLATION
 ------------------------------------------------------------------------
-1. Run "Logpile Setup 1.0.0.exe" to begin installation.
+1. Run "Logpile Setup 1.1.0.exe" to begin installation.
 
 2. Windows SmartScreen Notice:
    Note: Because Logpile is an unsigned open-source application, Windows 

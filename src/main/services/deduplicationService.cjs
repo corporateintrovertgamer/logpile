@@ -3,19 +3,78 @@ const { isUtilityTitle, isHiddenByDefaultTitle, isDlcTitle } = require('./utilit
 
 function id() { return crypto.randomUUID() }
 
-const TITLE_SUFFIXES = ['xbox game studios', 'standard edition', 'definitive edition', 'amazon prime', 'amazon luna', 'epic games', 'windows', 'steam']
+const TITLE_SUFFIXES = [
+  'xbox game studios',
+  'standard edition',
+  'definitive edition',
+  'game of the year edition',
+  'game of the year',
+  'goty edition',
+  'goty',
+  'master assassin edition',
+  'master assassin',
+  'gold edition',
+  'legacy collection',
+  'directors cut',
+  'director s cut',
+  'enhanced edition directors cut',
+  'enhanced edition director s cut',
+  'enhanced edition',
+  'enhanced',
+  'premium edition',
+  'special edition',
+  'anniversary edition',
+  '20th anniversary edition',
+  'legendary edition',
+  'challenger edition',
+  'rampage edition',
+  'premier edition',
+  'collector s edition',
+  'collectors edition',
+  'the collection',
+  'handsome collection',
+  'amazon prime',
+  'amazon luna',
+  'epic games',
+  'windows',
+  'steam',
+  'pc'
+]
+
 function normalizeCanonicalTitle(title) {
-  let value = String(title || '').toLowerCase().replace(/[™®©]/g, '').replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()
+  let value = String(title || '')
+    .toLowerCase()
+    .replace(/[™®©]/g, '')
+    .replace(/\s*\((pc|windows|mac|linux)\)\s*/gi, ' ')
+    .replace(/\b(legacy collection|bundle|edition)\s*\(\d{4}\)/gi, '$1')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
   let changed = true
   while (changed && value) {
     changed = false
     for (const suffix of TITLE_SUFFIXES) {
       if (value === suffix) continue
       const marker = ` ${suffix}`
-      if (value.endsWith(marker)) { value = value.slice(0, -marker.length).trim(); changed = true; break }
+      if (value.endsWith(marker)) {
+        value = value.slice(0, -marker.length).trim()
+        changed = true
+        break
+      }
     }
   }
-  return value.replace(/\b(game of the year|goty|definitive|ultimate|complete|deluxe|standard|edition|remastered|remaster|enhanced|digital|director'?s cut)\b/g, ' ').replace(/[^a-z0-9]/g, '')
+  return value.replace(/\b(game of the year|goty|definitive|ultimate|complete|deluxe|standard|edition|remastered|remaster|enhanced|digital|director s cut|directors cut|gold|legacy collection|master assassin|premium)\b/g, ' ')
+    .replace(/[^a-z0-9]/g, '')
+}
+
+function getEditionTierScore(title) {
+  const t = String(title || '').toLowerCase()
+  if (/\b(?:master assassin|ultimate|complete|collector'?s|legacy collection|handsome collection)\b/i.test(t)) return 5
+  if (/\b(?:game of the year|goty|gold|golden|director'?s cut|enhanced edition)\b/i.test(t)) return 4
+  if (/\b(?:deluxe|premium|special|anniversary|remastered|remaster|definitive|challenger|rampage|premier)\b/i.test(t)) return 3
+  if (/\b(?:enhanced|digital)\b/i.test(t)) return 2
+  return 1
 }
 
 function clean(value) { return value === undefined || value === null ? null : String(value).trim() || null }
@@ -129,8 +188,16 @@ function mergeRecord(db, record) {
     game = db.prepare('SELECT * FROM games WHERE id = ?').get(gameId)
     created = true
   } else {
+    const incomingTier = getEditionTierScore(canonicalTitle)
+    const existingTier = getEditionTierScore(game.canonical_title)
+    const preferIncomingTitle = (incomingTier > existingTier) || (incomingTier === existingTier && canonicalTitle.length > String(game.canonical_title || '').length) ? 1 : 0
+
     db.prepare(`UPDATE games SET
-      canonical_title = COALESCE(NULLIF(@canonicalTitle, ''), canonical_title),
+      canonical_title = CASE WHEN @preferIncomingTitle = 1 THEN @canonicalTitle ELSE canonical_title END,
+      store_name = CASE WHEN @preferIncomingTitle = 1 AND NULLIF(@storeName, '') IS NOT NULL THEN @storeName ELSE store_name END,
+      cover_url = CASE WHEN @preferIncomingTitle = 1 AND NULLIF(@coverUrl, '') IS NOT NULL THEN @coverUrl ELSE cover_url END,
+      hero_url = CASE WHEN @preferIncomingTitle = 1 AND NULLIF(@heroUrl, '') IS NOT NULL THEN @heroUrl ELSE hero_url END,
+      steamgriddb_id = CASE WHEN @preferIncomingTitle = 1 AND NULLIF(@steamGridDbId, '') IS NOT NULL THEN @steamGridDbId ELSE steamgriddb_id END,
       normalized_title = COALESCE(NULLIF(@normalizedTitle, ''), normalized_title),
       description = COALESCE(NULLIF(@description, ''), description),
       genre = COALESCE(NULLIF(@genre, ''), genre),
@@ -139,12 +206,7 @@ function mergeRecord(db, record) {
       developer = COALESCE(NULLIF(@developer, ''), developer),
       publisher = COALESCE(NULLIF(@publisher, ''), publisher),
       release_date = COALESCE(NULLIF(@releaseDate, ''), release_date),
-      cover_url = COALESCE(NULLIF(@coverUrl, ''), cover_url),
-      hero_url = COALESCE(NULLIF(@heroUrl, ''), hero_url),
-      logo_url = COALESCE(NULLIF(@logoUrl, ''), logo_url),
-      store_name = COALESCE(NULLIF(@storeName, ''), store_name),
       executable_path = COALESCE(NULLIF(@executablePath, ''), executable_path),
-      steamgriddb_id = COALESCE(NULLIF(@steamGridDbId, ''), steamgriddb_id),
       is_installed = CASE WHEN @isInstalled = 1 THEN 1 ELSE is_installed END,
       drive_letter = COALESCE(NULLIF(@driveLetter, ''), drive_letter),
       install_path = COALESCE(NULLIF(@installPath, ''), install_path),
@@ -162,6 +224,7 @@ function mergeRecord(db, record) {
       WHERE id = @id`).run({
       id: game.id,
       canonicalTitle,
+      preferIncomingTitle,
       normalizedTitle: normalized,
       description: clean(record.description) || '',
       genre: clean(record.genre) || clean(record.genres) || '',

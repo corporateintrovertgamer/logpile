@@ -11,20 +11,24 @@ import {
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import './styles/tokens.css'
 import './styles.css'
 import '@fontsource/outfit'
 import { normalizeArtworkUrl } from './utils/artworkUrl'
 import { SourceIcon } from './components/SourceIcons'
 import { CustomDropdown } from './components/CustomDropdown'
 import { AboutView } from './components/views/AboutView'
-import logo from './assets/logo.png'
+import logoDark from './assets/logo.png'
+import logoLight from './assets/logo-light.png'
+const logo = logoDark
 
 const fallbackApi = {
   async clearArtCache() { return 0 },
   async selectCustomArtwork() { return null },
   async setGameCategory() { return null },
+  async updateGameStatus() { return null },
   window: { minimize() {}, maximize() {}, close() {} },
-  database: { async seedCheck() { return { seeded: false, count: 0 } }, async getGames() { return [] }, async getLibraryStats() { return { totalGames: 0, installedGames: 0, utilityTools: 0, installedUtilities: 0, visibleGames: 0, visibleInstalledGames: 0, dlcGames: 0, installedDlc: 0, hiddenGames: 0, hiddenInstalledGames: 0, hiddenDlc: 0, hiddenInstalledDlc: 0, readyToInstallCount: 0, artworkCovered: 0, missingArtwork: 0, totalStorageGb: 0, platformBreakdown: [] } }, async getLibrarySettings() { return { autoHideSupportEntries: true, steamGridDbApiKey: '' } }, async getActivityLog() { return [] }, async getLibraryHealth() { return { totalGames: 0, installedGames: 0, lastBackupTimestamp: null, lastBackupPath: null, lastScanTimestamp: null, backupsDirectory: null } }, async backupNow() { return { ok: true, backupPath: '' } }, async listBackups() { return { directory: 'UserData/backups', backups: [] } }, async openBackupsFolder() { return { success: true } }, async chooseBackupFile() { return null }, async restoreBackup() { return { success: true } }, async setLibrarySettings() { return { autoHideSupportEntries: true, steamGridDbApiKey: '' } }, async setGameHidden() { return null }, async updateGameMetadata() { return null }, async deleteGames() { return null }, async bulkUpdateGames() { return null }, async bulkMoveGameCategory() { return null }, async bulkSetGameHidden() { return null }, async moveGameCategory() { return null }, async exportCsv() { return null }, async exportSelectedCsv() { return null }, async purgeLibrary() { return { deletedGames: 0 } }, async backupArtworkCache() { return null }, async restoreArtworkCache() { return null }, onUpdated() { return () => {} } },
+  database: { async seedCheck() { return { seeded: false, count: 0 } }, async getGames() { return [] }, async getLibraryStats() { return { totalGames: 0, installedGames: 0, utilityTools: 0, installedUtilities: 0, visibleGames: 0, visibleInstalledGames: 0, dlcGames: 0, installedDlc: 0, hiddenGames: 0, hiddenInstalledGames: 0, hiddenDlc: 0, hiddenInstalledDlc: 0, readyToInstallCount: 0, artworkCovered: 0, missingArtwork: 0, totalStorageGb: 0, platformBreakdown: [] } }, async getLibrarySettings() { return { autoHideSupportEntries: true, steamGridDbApiKey: '' } }, async getActivityLog() { return [] }, async getLibraryHealth() { return { totalGames: 0, installedGames: 0, lastBackupTimestamp: null, lastBackupPath: null, lastScanTimestamp: null, backupsDirectory: null } }, async backupNow() { return { ok: true, backupPath: '' } }, async listBackups() { return { directory: 'UserData/backups', backups: [] } }, async openBackupsFolder() { return { success: true } }, async chooseBackupFile() { return null }, async restoreBackup() { return { success: true } }, async setLibrarySettings() { return { autoHideSupportEntries: true, steamGridDbApiKey: '' } }, async setGameHidden() { return null }, async updateGameStatus() { return null }, async updateGameMetadata() { return null }, async deleteGames() { return null }, async bulkUpdateGames() { return null }, async bulkMoveGameCategory() { return null }, async bulkSetGameHidden() { return null }, async moveGameCategory() { return null }, async exportCsv() { return null }, async exportSelectedCsv() { return null }, async purgeLibrary() { return { deletedGames: 0 } }, async backupArtworkCache() { return null }, async restoreArtworkCache() { return null }, onUpdated() { return () => {} } },
   scanner: { async scanAll() { return {} }, async chooseImportFile() { return null }, async importFile() { return {} }, async importBuffer() { return {} }, onProgress() { return () => {} } },
   games: { async openUri() {}, async getMedia() { return { success: false, screenshots: [], movies: [] } }, async changeArtwork() { return null }, async refetchArtwork() { return null }, async refetchSelectedArtwork() { return null }, async chooseAndSaveArtwork() { return null }, async chooseExecutable() { return null }, async launchExecutable() { return null } },
   roulette: { async pick() { return null } },
@@ -45,6 +49,18 @@ const THEMES = {
   lab: { name: 'The Sterile Lab', dark: ['#0e1117', '#171b23', '#222934', '#f3f7fb', '#b0bcc9', '#7b8997', '#eab308', 'rgba(234,179,8,.22)', '#201800', '#394452', '#566576', 'rgba(234,179,8,.13)', '#fef08a'], light: ['#f5f7fa', '#ffffff', '#e7ebf0', '#17202c', '#526274', '#718295', '#ca8a04', 'rgba(202,138,4,.17)', '#fff', '#cbd5e1', '#aab7c5', 'rgba(202,138,4,.09)', '#854d0e'] },
 }
 const THEME_KEYS = Object.keys(THEMES)
+const PALETTE_SLUG_MAP = {
+  monolith: 'the-monolith',
+  brutalist: 'the-brutalist-sanctuary',
+  eerie: 'the-eerie-calm',
+  wasteland: 'the-wasteland-horizon',
+  glitch: 'the-system-glitch',
+  ruins: 'the-overgrown-ruins',
+  syndicate: 'the-neon-syndicate',
+  submerged: 'the-submerged-base',
+  ember: 'the-ash-ember',
+  lab: 'the-sterile-lab',
+}
 function themeVars(themeKey, mode) {
   const theme = THEMES[themeKey] || THEMES.monolith
   const safeMode = mode === 'light' ? 'light' : 'dark'
@@ -99,6 +115,8 @@ const TITLE_SUFFIXES = [
   'deluxe',
   'ultimate edition',
   'the ultimate edition',
+  'enhanced edition directors cut',
+  'enhanced edition director s cut',
   'enhanced edition',
   'enhanced',
   'remastered',
@@ -123,14 +141,17 @@ const TITLE_SUFFIXES = [
   'epic games',
   'windows',
   'steam',
+  'pc',
 ]
 function normalizedGameTitle(title) {
   const raw = String(title || '').trim()
-  const yearMatch = raw.match(/\((19\d\d|20\d\d)\)/)
+  const isEditionYear = /\b(?:edition|collection|bundle|remaster|cut)\s*\((?:19\d\d|20\d\d)\)/i.test(raw)
+  const yearMatch = !isEditionYear ? raw.match(/\((19\d\d|20\d\d)\)/) : null
   const yearTag = yearMatch ? ` ${yearMatch[1]}` : ''
 
   let normalized = raw
     .replace(/[\u2122\u00ae\u00a9]/g, '')
+    .replace(/\s*\((?:pc|windows|mac|linux)\)\s*/gi, ' ')
     .replace(/\((19\d\d|20\d\d)\)/g, '')
     .toLocaleLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
@@ -177,6 +198,15 @@ function strictTitleSearch(games, query) {
   if (!queryText) return [...games]
   return games.filter((game) => titleMatchesQuery(game.canonical_title, queryText)).sort((a, b) => titleSearchRank(a.canonical_title, queryText) - titleSearchRank(b.canonical_title, queryText) || a.canonical_title.localeCompare(b.canonical_title))
 }
+function getEditionTierScore(title) {
+  const t = String(title || '').toLowerCase()
+  if (/\b(?:master assassin|ultimate|complete|collector'?s|legacy collection|handsome collection)\b/i.test(t)) return 5
+  if (/\b(?:game of the year|goty|gold|golden|director'?s cut|enhanced edition)\b/i.test(t)) return 4
+  if (/\b(?:deluxe|premium|special|anniversary|remastered|remaster|definitive|challenger|rampage|premier)\b/i.test(t)) return 3
+  if (/\b(?:enhanced|digital)\b/i.test(t)) return 2
+  return 1
+}
+
 function consolidateGames(games = []) {
   const groups = new Map()
   for (const game of games) {
@@ -188,10 +218,21 @@ function consolidateGames(games = []) {
     groups.set(key, variants)
   }
   return [...groups.values()].map((variants) => {
-    const representative = [...variants].sort((a, b) => Number(Boolean(b.is_installed)) - Number(Boolean(a.is_installed)) || Number(Boolean(b.executable_path)) - Number(Boolean(a.executable_path)) || String(a.canonical_title).length - String(b.canonical_title).length || String(a.canonical_title).localeCompare(String(b.canonical_title)))[0]
-    const sources = [...new Map(variants.flatMap((variant) => variant.sources || []).map((source) => [`${source.platform}|${source.platformGameId}|${source.launchUri || ''}`, source])).values()]
+    const sortedVariants = [...variants].sort((a, b) => {
+      const tierDiff = getEditionTierScore(b.canonical_title) - getEditionTierScore(a.canonical_title)
+      if (tierDiff !== 0) return tierDiff
+      const installDiff = Number(Boolean(b.is_installed && b.executable_path)) - Number(Boolean(a.is_installed && a.executable_path))
+      if (installDiff !== 0) return installDiff
+      const anyInstallDiff = Number(Boolean(b.is_installed)) - Number(Boolean(a.is_installed))
+      if (anyInstallDiff !== 0) return anyInstallDiff
+      const lenDiff = String(b.canonical_title || '').length - String(a.canonical_title || '').length
+      if (lenDiff !== 0) return lenDiff
+      return String(a.canonical_title || '').localeCompare(String(b.canonical_title || ''))
+    })
+    const representative = sortedVariants[0]
+    const sources = [...new Map(sortedVariants.flatMap((variant) => variant.sources || []).map((source) => [`${source.platform}|${source.platformGameId}|${source.launchUri || ''}`, source])).values()]
     const installedVariant = variants.find((variant) => variant.is_installed && variant.executable_path) || variants.find((variant) => variant.is_installed) || representative
-    const merged = { ...representative, variants, sources, is_utility: Boolean(representative.is_utility), is_dlc: Boolean(representative.is_dlc), is_installed: variants.some((variant) => Boolean(variant.is_installed)), play_time_seconds: variants.reduce((total, variant) => total + Number(variant.play_time_seconds || 0), 0), install_size_bytes: variants.reduce((total, variant) => total + Number(variant.install_size_bytes || 0), 0), install_size_gb: Number((variants.reduce((total, variant) => total + Number(variant.install_size_bytes || 0), 0) / (1024 ** 3)).toFixed(2)), executable_path: installedVariant.executable_path || null, drive_letter: installedVariant.drive_letter || representative.drive_letter, install_path: installedVariant.install_path || representative.install_path }
+    const merged = { ...representative, variants: sortedVariants, sources, is_utility: Boolean(representative.is_utility), is_dlc: Boolean(representative.is_dlc), is_installed: variants.some((variant) => Boolean(variant.is_installed)), play_time_seconds: variants.reduce((total, variant) => total + Number(variant.play_time_seconds || 0), 0), install_size_bytes: variants.reduce((total, variant) => total + Number(variant.install_size_bytes || 0), 0), install_size_gb: Number((variants.reduce((total, variant) => total + Number(variant.install_size_bytes || 0), 0) / (1024 ** 3)).toFixed(2)), executable_path: installedVariant.executable_path || null, drive_letter: installedVariant.drive_letter || representative.drive_letter, install_path: installedVariant.install_path || representative.install_path }
     return merged
   })
 }
@@ -216,7 +257,12 @@ function launcherLabelFromUri(uri) {
 }
 function splitSourceLabels(value) { return String(value || '').split(/[,;|]/).map((label) => normalizeStoreLabel(label.trim())).filter((label) => label && label.toLowerCase() !== 'custom') }
 function sourceLabelsForGame(game) {
-  const variants = game.variants || [game]
+  const rawVariants = game.variants || [game]
+  const variants = [...rawVariants].sort((a, b) => {
+    const tierDiff = getEditionTierScore(b.canonical_title) - getEditionTierScore(a.canonical_title)
+    if (tierDiff !== 0) return tierDiff
+    return Number(Boolean(b.is_installed)) - Number(Boolean(a.is_installed))
+  })
   const labels = variants.flatMap((variant) => {
     const customLabels = splitSourceLabels(variant.store_name || variant.storeName || variant.source)
     const sources = variant.sources || []
@@ -504,7 +550,7 @@ function LibraryHealthSection({
       <div className="automation-disclaimer library-health-disclaimer">
         <Info size={14} className="disclaimer-icon" />
         <p>
-          Logpile's automated scanner tries its best, but as a passion project built by a first-time developer, it may occasionally select incorrect or low-resolution artwork. For the best visual experience, we recommend using the manual IGDB/SteamGridDB tool to update imperfect covers.
+          Automated scrapers occasionally miss on franchise subtitles. You can override any poster instantly using our SteamGridDB quick-picker.
         </p>
       </div>
 
@@ -1365,10 +1411,15 @@ function ContextMenu({ menu, menuRef, onClose, onMoveCategory, onEditGame, onHid
 function GameCard({ game, onLaunch, onSelect, onHideGame, onContextMenu, compact = false, selectMode = false, selected = false, onToggleSelect, onImageError, isRestored = false }) {
   const platforms = sourcePlatforms(game.sources)
   const storeLabels = sourceLabelsForGame(game)
+  const rawStatus = String(game.status || game.backlog_status || 'unplayed').toLowerCase()
+  const currentStatus = rawStatus === 'dropped' ? 'paused' : (['playing', 'paused', 'completed', 'unplayed'].includes(rawStatus) ? rawStatus : 'unplayed')
+  const statusLabel = currentStatus === 'playing' ? '● Playing' : currentStatus === 'paused' ? '⏸ On Pause' : currentStatus === 'completed' ? '✓ Completed' : '○ Unplayed'
+
   return (
     <article
       tabIndex={0}
-      className={cn('poster-card', compact && 'poster-card-compact', selectMode && 'poster-card-selectable', selected && 'poster-card-selected', isRestored && 'poster-card-restored')}
+      data-status={currentStatus}
+      className={cn('poster-card', `status-${currentStatus}`, compact && 'poster-card-compact', selectMode && 'poster-card-selectable', selected && 'poster-card-selected', isRestored && 'poster-card-restored')}
       onClick={() => selectMode ? onToggleSelect?.(game) : onSelect?.(game)}
       onKeyDown={(event) => {
         if ((event.key === 'Enter' || event.key === ' ') && !selectMode && !event.target.closest('button')) {
@@ -1403,7 +1454,7 @@ function GameCard({ game, onLaunch, onSelect, onHideGame, onContextMenu, compact
           {game.is_favorite ? <Star size={14} fill="currentColor" /> : null}
         </div>
         <div className="poster-bottom">
-          <span className="backlog-label">{game.backlog_status || 'unplayed'}</span>
+          <span className={cn('backlog-label', `status-pill-badge-${currentStatus}`)}>{statusLabel}</span>
           <span>{formatPlayTime(game.play_time_seconds)}</span>
         </div>
         {/* Dynamic Theatrical Hover/Focus Overlay for Cinematic Theme */}
@@ -1580,7 +1631,7 @@ function ScanImportPanel({ open, onClose, onRefresh }) {
         <div className="automation-disclaimer modal-disclaimer">
           <Info size={13} className="disclaimer-icon" />
           <p>
-            Logpile's automated scanner tries its best, but as a passion project built by a first-time developer, it may occasionally select incorrect or low-resolution artwork. For the best visual experience, we recommend using the manual IGDB/SteamGridDB tool to update imperfect covers.
+            Automated scrapers occasionally miss on franchise subtitles. You can override any poster instantly using our SteamGridDB quick-picker.
           </p>
         </div>
       </div>
@@ -2237,9 +2288,9 @@ function getRelatedGames(activeGame, allGames = []) {
 const LAYOUT_THEMES = [
   { value: 'cinematic', label: '🎬 Cinematic', icon: Sparkles },
   { value: 'kinetic', label: '⚡ Kinetic', icon: Activity },
-  { value: 'playful', label: '🪵 Playful', icon: Gamepad2, disabled: true, badge: 'Coming Soon' },
-  { value: 'atmospheric', label: '🕵️ Atmospheric', icon: Moon, disabled: true, badge: 'Coming Soon' },
-  { value: 'competitive', label: '🏆 Competitive', icon: Trophy, disabled: true, badge: 'Coming Soon' },
+  { value: 'playful', label: '🪵 Playful', icon: Gamepad2 },
+  { value: 'atmospheric', label: '🕵️ Atmospheric', icon: Moon },
+  { value: 'competitive', label: '🏆 Competitive', icon: Trophy },
 ]
 
 function ThemeSelector({ themeKey, mode, setThemeKey, setMode }) {
@@ -2636,6 +2687,187 @@ function MediaLightbox({ items = [], initialIndex = 0, onClose }) {
   )
 }
 
+const SANCTUARY_STATUS_OPTIONS = [
+  {
+    key: 'playing',
+    symbol: '●',
+    label: 'Playing',
+    subtext: 'Active in current rotation',
+  },
+  {
+    key: 'paused',
+    symbol: '⏸',
+    label: 'On Pause',
+    subtext: 'Taking a break / shelved',
+  },
+  {
+    key: 'completed',
+    symbol: '✓',
+    label: 'Completed',
+    subtext: 'Finished campaign / had my fill',
+  },
+  {
+    key: 'unplayed',
+    symbol: '○',
+    label: 'Unplayed',
+    subtext: 'Reset to vault / backlog',
+  },
+]
+
+function SanctuaryStatusDropdown({ game, onStatusChange }) {
+  const [open, setOpen] = useState(false)
+  const [focusedIndex, setFocusedIndex] = useState(-1)
+  const anchorRef = useRef(null)
+  const menuRef = useRef(null)
+
+  const currentKey = useMemo(() => {
+    const raw = String(game?.status || game?.backlog_status || 'unplayed').toLowerCase()
+    if (raw === 'dropped') return 'paused'
+    return ['playing', 'paused', 'completed', 'unplayed'].includes(raw) ? raw : 'unplayed'
+  }, [game?.status, game?.backlog_status])
+
+  const activeOption = useMemo(
+    () => SANCTUARY_STATUS_OPTIONS.find((opt) => opt.key === currentKey) || SANCTUARY_STATUS_OPTIONS[3],
+    [currentKey]
+  )
+
+  useEffect(() => {
+    if (!open) return
+    const handleOutside = (e) => {
+      if (anchorRef.current && !anchorRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    window.addEventListener('pointerdown', handleOutside)
+    return () => window.removeEventListener('pointerdown', handleOutside)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) {
+      setFocusedIndex(-1)
+    } else {
+      const curIdx = SANCTUARY_STATUS_OPTIONS.findIndex((o) => o.key === currentKey)
+      setFocusedIndex(curIdx >= 0 ? curIdx : 0)
+    }
+  }, [open, currentKey])
+
+  const handleKeyDown = (e) => {
+    if (!open) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        e.preventDefault()
+        e.stopPropagation()
+        setOpen(true)
+      }
+      return
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      e.stopPropagation()
+      setOpen(false)
+      anchorRef.current?.querySelector('button.status-dropdown-pill')?.focus()
+      return
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      e.stopPropagation()
+      setFocusedIndex((prev) => (prev + 1) % SANCTUARY_STATUS_OPTIONS.length)
+      return
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      e.stopPropagation()
+      setFocusedIndex((prev) => (prev - 1 + SANCTUARY_STATUS_OPTIONS.length) % SANCTUARY_STATUS_OPTIONS.length)
+      return
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      e.stopPropagation()
+      if (focusedIndex >= 0 && focusedIndex < SANCTUARY_STATUS_OPTIONS.length) {
+        const selected = SANCTUARY_STATUS_OPTIONS[focusedIndex].key
+        setOpen(false)
+        if (selected !== currentKey) {
+          onStatusChange?.(selected)
+        }
+      }
+    }
+  }
+
+  const handleSelect = (key) => {
+    setOpen(false)
+    if (key !== currentKey) {
+      onStatusChange?.(key)
+    }
+  }
+
+  return (
+    <div
+      ref={anchorRef}
+      className={cn('status-dropdown-anchor', open && 'is-open')}
+      onKeyDown={handleKeyDown}
+    >
+      <button
+        type="button"
+        className={cn('status-dropdown-pill', `status-pill-${currentKey}`, open && 'active')}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title={`Sanctuary status: ${activeOption.label}. Click to toggle.`}
+      >
+        <span className="status-pill-glyph">{activeOption.symbol}</span>
+        <span className="status-pill-label">{activeOption.label}</span>
+        <ChevronDown size={11} className={cn('status-pill-chevron', open && 'rotate-180')} />
+      </button>
+
+      {open && (
+        <div
+          ref={menuRef}
+          role="listbox"
+          aria-label="Select Game Progress Status"
+          className="status-dropdown-menu"
+        >
+          <div className="status-menu-header">Sanctuary Status</div>
+          {SANCTUARY_STATUS_OPTIONS.map((opt, idx) => {
+            const isSelected = opt.key === currentKey
+            const isFocused = idx === focusedIndex
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                tabIndex={-1}
+                className={cn(
+                  'status-menu-item',
+                  `status-item-${opt.key}`,
+                  isSelected && 'is-selected',
+                  isFocused && 'is-focused'
+                )}
+                onClick={() => handleSelect(opt.key)}
+                onMouseEnter={() => setFocusedIndex(idx)}
+              >
+                <div className="status-item-leading">
+                  <span className="status-item-glyph">{opt.symbol}</span>
+                </div>
+                <div className="status-item-text">
+                  <span className="status-item-label">{opt.label}</span>
+                  <span className="status-item-subtext">{opt.subtext}</span>
+                </div>
+                {isSelected ? (
+                  <Check size={13} className="status-item-check" />
+                ) : null}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function HeroView({
   games,
   activeGame,
@@ -2647,6 +2879,7 @@ function HeroView({
   onMoveCategory,
   onToggleFavorite,
   onUpdateBacklog,
+  onUpdateStatus,
   onSelectGenre,
   onGameUpdated,
   onContextMenu,
@@ -2723,6 +2956,15 @@ function HeroView({
 
   useEffect(() => {
     const scrollEl = scrollContainerRef?.current || document.querySelector('.main-scroll')
+    if (scrollEl) {
+      scrollEl.scrollTop = 0
+    }
+    setIsScrolled(false)
+    onScrollStateChange?.(false)
+  }, [activeGame?.id, scrollContainerRef, onScrollStateChange])
+
+  useEffect(() => {
+    const scrollEl = scrollContainerRef?.current || document.querySelector('.main-scroll')
     if (!scrollEl) return
 
     const handleScroll = () => {
@@ -2736,7 +2978,7 @@ function HeroView({
     return () => {
       scrollEl.removeEventListener('scroll', handleScroll)
     }
-  }, [scrollContainerRef, onScrollStateChange])
+  }, [scrollContainerRef, onScrollStateChange, activeGame?.id])
 
   useEffect(() => {
     if (!launchMenuOpen && !moreMenuOpen) return
@@ -2950,20 +3192,6 @@ function HeroView({
               <ArrowLeft size={14} />
               <span>Back to Library</span>
             </button>
-            {isScrolled && (
-              <>
-                <div className="cinematic-capsule-divider" />
-                <button
-                  type="button"
-                  className="cinematic-docked-play-button"
-                  onClick={() => onLaunch(activeGame)}
-                  title={activeGame.is_installed ? `Launch ${activeGame.canonical_title}` : `Install ${activeGame.canonical_title}`}
-                >
-                  <Play size={12} fill="currentColor" />
-                  <span>{activeGame.is_installed ? 'Play Now' : 'Install'}</span>
-                </button>
-              </>
-            )}
           </div>
 
           <div className="cinematic-top-actions">
@@ -3076,22 +3304,31 @@ function HeroView({
 
                   <div className="hero-menu-divider" />
 
-                  {/* Backlog Status Quick Selector */}
-                  <div className="hero-menu-header">Backlog Status</div>
+                  {/* Sanctuary Status Quick Selector */}
+                  <div className="hero-menu-header">Sanctuary Status</div>
                   <div className="hero-backlog-chips">
-                    {['unplayed', 'playing', 'completed', 'dropped'].map((status) => (
-                      <button
-                        key={status}
-                        type="button"
-                        className={cn('hero-backlog-chip', (activeGame.backlog_status || 'unplayed') === status && 'active')}
-                        onClick={() => {
-                          setMoreMenuOpen(false)
-                          onUpdateBacklog?.(activeGame, status)
-                        }}
-                      >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </button>
-                    ))}
+                    {[
+                      { key: 'playing', label: 'Playing' },
+                      { key: 'paused', label: 'On Pause' },
+                      { key: 'completed', label: 'Completed' },
+                      { key: 'unplayed', label: 'Unplayed' }
+                    ].map((item) => {
+                      const cur = String(activeGame.status || (activeGame.backlog_status === 'dropped' ? 'paused' : (activeGame.backlog_status || 'unplayed'))).toLowerCase()
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          className={cn('hero-backlog-chip', cur === item.key && 'active')}
+                          onClick={() => {
+                            setMoreMenuOpen(false)
+                            if (onUpdateStatus) onUpdateStatus(activeGame, item.key)
+                            else onUpdateBacklog?.(activeGame, item.key)
+                          }}
+                        >
+                          {item.label}
+                        </button>
+                      )
+                    })}
                   </div>
 
                   <div className="hero-menu-divider" />
@@ -3156,9 +3393,6 @@ function HeroView({
           <div className="cinematic-hero-left">
             {/* Game Title: Official Logo if available, fallback to styled text */}
             <div className="hero-title-area">
-              {layoutTheme === 'kinetic' && (
-                <div className="kinetic-target-ident">// TARGET IDENTIFIER //</div>
-              )}
               {logoArtwork ? (
                 <img
                   src={logoArtwork}
@@ -3183,20 +3417,63 @@ function HeroView({
             {/* Tactical / Theatrical Metadata Line */}
             {layoutTheme === 'kinetic' ? (
               <p className="hero-billing-block kinetic-meta-line">
-                {`// ${dev || 'UNKNOWN DEV'} · ${pub || 'UNKNOWN PUB'} · ${gameYear(activeGame) || '----'}`}
+                {[(dev || '').split(',')[0].trim() || 'DEV UNKNOWN', pub, gameYear(activeGame)].filter(Boolean).join(' · ')}
               </p>
-            ) : billingCredit ? (
+            ) : layoutTheme === 'competitive' ? (
+              (() => {
+                const primaryDev = (dev || '').split(',')[0].trim()
+                const parts = [primaryDev, pub !== primaryDev ? pub : null, gameYear(activeGame)].filter(Boolean)
+                return parts.length > 0 ? (
+                  <p className="hero-billing-block competitive-meta-line">
+                    {parts.join(' · ')}
+                  </p>
+                ) : null
+              })()
+            ) : layoutTheme === 'playful' ? (
+              (() => {
+                const primaryDev = (dev || '').split(',')[0].trim()
+                const parts = [primaryDev, gameYear(activeGame)].filter(Boolean)
+                return parts.length > 0 ? (
+                  <p className="hero-billing-block playful-meta-line">
+                    {parts.join(' · ')}
+                  </p>
+                ) : null
+              })()
+            ) : layoutTheme === 'atmospheric' ? null : billingCredit ? (
               <p className="hero-billing-block">
                 {billingCredit}
               </p>
             ) : null}
 
-            {/* Low-opacity Monochromatic Status Line */}
-            {statusCredit ? (
-              <p className="hero-status-monochrome">
-                {statusCredit}
-              </p>
-            ) : null}
+            {/* Interactive Sanctuary Status Sub-header Row: INSTALLED · [STORE] · [STATUS] */}
+            <div className="hero-sub-metadata-row">
+              <span className="hero-sub-chip">
+                {activeGame.is_installed ? 'INSTALLED' : 'READY TO INSTALL'}
+              </span>
+              {storeLabels.map((lbl) => (
+                <span key={lbl} className="hero-sub-chip-group">
+                  <span className="hero-sub-sep">·</span>
+                  <span className="hero-sub-chip">{lbl.toUpperCase()}</span>
+                </span>
+              ))}
+              <span className="hero-sub-sep">·</span>
+              <SanctuaryStatusDropdown
+                game={activeGame}
+                onStatusChange={(nextStatus) => {
+                  if (onUpdateStatus) {
+                    onUpdateStatus(activeGame, nextStatus)
+                  } else if (onUpdateBacklog) {
+                    onUpdateBacklog(activeGame, nextStatus)
+                  }
+                }}
+              />
+              {activeGame.executable_path && (
+                <span className="hero-sub-chip-group">
+                  <span className="hero-sub-sep">·</span>
+                  <span className="hero-sub-chip">DIRECT EXE</span>
+                </span>
+              )}
+            </div>
 
             {/* Launch Trigger */}
             <div className="hero-cta-row">
@@ -3207,16 +3484,52 @@ function HeroView({
                     className="hero-play-button"
                     onClick={() => onLaunch(activeGame)}
                   >
-                    {layoutTheme === 'kinetic' ? (
+                    {layoutTheme === 'atmospheric' ? (
                       activeGame.is_installed ? (
                         <>
                           <Play size={16} fill="currentColor" />
-                          <span>/// ENGAGE // PLAY NOW</span>
+                          <span>Play</span>
                         </>
                       ) : (
                         <>
                           <Download size={16} />
-                          <span>/// ENGAGE // INSTALL</span>
+                          <span>Install</span>
+                        </>
+                      )
+                    ) : layoutTheme === 'kinetic' ? (
+                      activeGame.is_installed ? (
+                        <>
+                          <Play size={14} fill="currentColor" />
+                          <span>PLAY NOW</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download size={14} />
+                          <span>INSTALL</span>
+                        </>
+                      )
+                    ) : layoutTheme === 'playful' ? (
+                      activeGame.is_installed ? (
+                        <>
+                          <Play size={16} fill="currentColor" />
+                          <span>PRESS START</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download size={16} />
+                          <span>INSERT GAME</span>
+                        </>
+                      )
+                    ) : layoutTheme === 'competitive' ? (
+                      activeGame.is_installed ? (
+                        <>
+                          <Play size={15} fill="currentColor" />
+                          <span>QUEUE MATCH</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download size={15} />
+                          <span>PRE-LOAD</span>
                         </>
                       )
                     ) : (
@@ -3251,13 +3564,30 @@ function HeroView({
                 {layoutTheme === 'kinetic' && (
                   <div className="kinetic-telemetry-strip">
                     <span className="kinetic-telemetry-chip">
-                      {`SYS // ${(storeLabels[0] || platformLabel(primaryPlatform) || 'LOCAL').toUpperCase()}`}
+                      {(storeLabels[0] || platformLabel(primaryPlatform) || 'LOCAL').toUpperCase()}
                     </span>
                     <span className="kinetic-telemetry-chip">
-                      {`DATA // ${activeGame.install_size_gb ? formatGb(activeGame.install_size_gb) : (activeGame.install_size_bytes ? formatBytes(activeGame.install_size_bytes) : 'N/A')}`}
+                      {activeGame.install_size_gb ? formatGb(activeGame.install_size_gb) : (activeGame.install_size_bytes ? formatBytes(activeGame.install_size_bytes) : 'N/A')}
                     </span>
                     <span className="kinetic-telemetry-chip">
-                      {`LOGGED // ${activeGame.play_time_seconds > 0 ? formatPlayTime(activeGame.play_time_seconds).toUpperCase() : 'NO LOG'}`}
+                      {activeGame.play_time_seconds > 0 ? formatPlayTime(activeGame.play_time_seconds).toUpperCase() : 'NO LOG'}
+                    </span>
+                  </div>
+                )}
+
+                {layoutTheme === 'competitive' && (
+                  <div className="competitive-telemetry-strip">
+                    <span className="competitive-telemetry-chip">
+                      <span className="telemetry-label">SERVER:</span>
+                      <span className="telemetry-val">{(storeLabels[0] || platformLabel(primaryPlatform) || 'ONLINE').toUpperCase()}</span>
+                    </span>
+                    <span className="competitive-telemetry-chip">
+                      <span className="telemetry-label">CLIENT:</span>
+                      <span className="telemetry-val">{activeGame.install_size_gb ? formatGb(activeGame.install_size_gb) : (activeGame.install_size_bytes ? formatBytes(activeGame.install_size_bytes) : 'SYNCED')}</span>
+                    </span>
+                    <span className="competitive-telemetry-chip">
+                      <span className="telemetry-label">LOGGED:</span>
+                      <span className="telemetry-val">{activeGame.play_time_seconds > 0 ? formatPlayTime(activeGame.play_time_seconds).toUpperCase() : '0H'}</span>
                     </span>
                   </div>
                 )}
@@ -3349,6 +3679,15 @@ function HeroView({
                 )}
               </div>
             </div>
+            {layoutTheme === 'atmospheric' && (
+              <div className="atmospheric-meta-line">
+                {[
+                  activeGame.developer || 'Unknown',
+                  gameYear(activeGame) || activeGame.release_date || null,
+                  storeLabels[0] || platformLabel(primaryPlatform) || null,
+                ].filter(Boolean).join(' · ')}
+              </div>
+            )}
           </div>
         </div>
 
@@ -3361,7 +3700,7 @@ function HeroView({
           }}
           title="Scroll to explore dossier"
         >
-          <ChevronDown size={18} className="cinematic-pill-chevron" />
+          <ChevronDown size={16} className="cinematic-pill-chevron" />
         </div>
       </div>
 
@@ -3463,7 +3802,7 @@ function HeroView({
               <div className="cinematic-dossier-col cinematic-dossier-col-right">
                 {/* Series & Franchise Carousel - if available */}
                 {franchise.games.length > 0 && (
-                  <section className="franchise-carousel-section" style={{ marginTop: 0, paddingLeft: 0, paddingRight: 0 }}>
+                  <section className="franchise-carousel-section" style={{ marginTop: 0, paddingLeft: 0, paddingRight: 0, overflow: 'visible' }}>
                     <div className="franchise-header">
                       <div>
                         <div className="eyebrow">
@@ -3475,7 +3814,7 @@ function HeroView({
                       <span>{franchise.games.length} related {franchise.games.length === 1 ? 'title' : 'titles'}</span>
                     </div>
 
-                    <div className="franchise-scroll-track">
+                    <div className="franchise-scroll-track cinematic-series-row franchise-rack">
                       {franchise.games.map((game) => (
                         <button
                           key={game.id}
@@ -3505,7 +3844,7 @@ function HeroView({
                 {/* Media Showcase Preview */}
                 {screenshotItems.length > 0 && (
                   <section className="cinematic-overview-media-section" style={{ marginTop: franchise.games.length > 0 ? '24px' : '0' }}>
-                    <div className="franchise-header" style={{ marginBottom: '14px' }}>
+                    <div className="franchise-header">
                       <div>
                         <div className="eyebrow">
                           <span>MEDIA & CAPTURES</span>
@@ -3562,7 +3901,7 @@ function HeroView({
 
                 {/* If neither franchise nor screenshots exist, show related titles preview if any */}
                 {franchise.games.length === 0 && screenshotItems.length === 0 && relatedGamesData.games.length > 0 && (
-                  <section className="franchise-carousel-section" style={{ marginTop: 0, paddingLeft: 0, paddingRight: 0 }}>
+                  <section className="franchise-carousel-section studio-section cinematic-studio-section" style={{ marginTop: 0, paddingLeft: 0, paddingRight: 0, overflow: 'visible' }}>
                     <div className="franchise-header">
                       <div>
                         <div className="eyebrow">
@@ -3574,7 +3913,7 @@ function HeroView({
                       <span>{relatedGamesData.games.length} titles</span>
                     </div>
 
-                    <div className="franchise-scroll-track">
+                    <div className="franchise-scroll-track studio-scroll-track studio-row cinematic-studio-track related-games-row">
                       {relatedGamesData.games.slice(0, 6).map((game) => (
                         <button
                           key={game.id}
@@ -3606,9 +3945,9 @@ function HeroView({
         )}
 
         {activeTab === 'related' && (
-          <div className="cinematic-tab-pane">
+          <div className="cinematic-tab-pane" style={{ overflow: 'visible' }}>
             {relatedGamesData.games.length > 0 ? (
-              <section className="franchise-carousel-section" style={{ marginTop: 0, paddingLeft: 0, paddingRight: 0 }}>
+              <section className="franchise-carousel-section studio-section cinematic-studio-section" style={{ marginTop: 0, paddingLeft: 0, paddingRight: 0, overflow: 'visible' }}>
                 <div className="franchise-header">
                   <div>
                     <div className="eyebrow">
@@ -3620,7 +3959,7 @@ function HeroView({
                   <span>{relatedGamesData.games.length} related {relatedGamesData.games.length === 1 ? 'title' : 'titles'}</span>
                 </div>
 
-                <div className="franchise-scroll-track">
+                <div className="franchise-scroll-track studio-scroll-track studio-row cinematic-studio-track related-games-row">
                   {relatedGamesData.games.map((game) => (
                     <button
                       key={game.id}
@@ -4139,6 +4478,7 @@ function App() {
   const handleSelectGame = (game) => {
     if (mainScrollRef.current) {
       libraryScrollRef.current = mainScrollRef.current.scrollTop
+      mainScrollRef.current.scrollTop = 0
     }
     lastClickedGameIdRef.current = game?.id || null
     setActiveGame(game)
@@ -4335,7 +4675,12 @@ function App() {
       }
     })
   }
-  const displayTotalGames = Math.max(0, stats.visibleGames ?? (stats.totalGames - stats.utilityTools - (stats.dlcGames || 0) - (stats.hiddenGames || 0) - (stats.hiddenDlc || 0))); const displayInstalledGames = Math.max(0, stats.visibleInstalledGames ?? (stats.installedGames - (stats.installedUtilities || 0) - (stats.installedDlc || 0) - (stats.hiddenInstalledGames || 0) - (stats.hiddenInstalledDlc || 0))); const displayDlcGames = Math.max(0, stats.dlcGames || 0); const readyToInstallCount = Math.max(0, Number(stats.readyToInstallCount || 0)); const installedPercent = displayTotalGames ? Math.round((displayInstalledGames / displayTotalGames) * 100) : 0; const safeThemeKey = THEMES[themeKey] ? themeKey : 'monolith'; const safeMode = mode === 'light' ? 'light' : 'dark'; const vars = themeVars(safeThemeKey, safeMode)
+  const displayTotalGames = Math.max(0, stats.visibleGames ?? (stats.totalGames - stats.utilityTools - (stats.dlcGames || 0) - (stats.hiddenGames || 0) - (stats.hiddenDlc || 0))); const displayInstalledGames = Math.max(0, stats.visibleInstalledGames ?? (stats.installedGames - (stats.installedUtilities || 0) - (stats.installedDlc || 0) - (stats.hiddenInstalledGames || 0) - (stats.hiddenInstalledDlc || 0))); const displayDlcGames = Math.max(0, stats.dlcGames || 0); const readyToInstallCount = Math.max(0, Number(stats.readyToInstallCount || 0)); const installedPercent = displayTotalGames ? Math.round((displayInstalledGames / displayTotalGames) * 100) : 0; const safeThemeKey = THEMES[themeKey] ? themeKey : 'monolith'; const safeMode = mode === 'light' ? 'light' : 'dark'; const vars = themeVars(safeThemeKey, safeMode); const currentPalette = PALETTE_SLUG_MAP[safeThemeKey] || 'the-monolith'
+  useEffect(() => {
+    document.documentElement.setAttribute('data-mode', safeMode)
+    document.documentElement.setAttribute('data-palette', currentPalette)
+    document.documentElement.setAttribute('data-layout', layoutTheme)
+  }, [safeMode, currentPalette, layoutTheme])
   const toggleSource = (source) => setSourceFilters((current) => current.includes(source) ? current.filter((item) => item !== source) : [...current, source])
   const chooseLaunchVariant = (game) => {
     const installed = (game.variants || [game]).filter((variant) => variant.is_installed)
@@ -4384,8 +4729,9 @@ function App() {
   const detailCover = activeGame?.cover_url ? normalizeArtworkUrl(activeGame.cover_url) : null
   const detailBackdropUrl = detailHero || detailCover
   const isBackdropFallbackBlur = !detailHero && Boolean(detailCover)
+  const activeLogo = safeMode === 'light' ? (logoLight || logoDark) : logoDark
 
-  return <div className={cn("app-shell", isDetailView && "is-detail-view", isDetailView && isDetailHudIdle && "detail-hud-idle", isDetailView && isDetailScrolled && "detail-is-scrolled", sidebarCollapsed && "sidebar-is-collapsed", `layout-${layoutTheme}`)} data-theme={themeKey} data-layout-theme={layoutTheme} data-mode={mode} style={vars}>
+  return <div className={cn("app-shell", isDetailView && "is-detail-view", isDetailView && isDetailHudIdle && "detail-hud-idle", isDetailView && isDetailScrolled && "detail-is-scrolled", sidebarCollapsed && "sidebar-is-collapsed", `layout-${layoutTheme}`)} data-theme={themeKey} data-palette={currentPalette} data-layout-theme={layoutTheme} data-layout={layoutTheme} data-mode={safeMode} style={vars}>
     {isDetailView && detailBackdropUrl && (
       <div className="global-detail-backdrop-wrap">
         <div
@@ -4395,13 +4741,13 @@ function App() {
         <div className="global-detail-backdrop-gradient" />
       </div>
     )}
-    <header className="titlebar"><div className="drag-region"><img src={logo} alt="Logpile" className="w-6 h-6 object-contain flex-shrink-0 shrink-0 aspect-square rounded select-none pointer-events-none" style={{ width: '24px', height: '24px', minWidth: '24px', minHeight: '24px', maxWidth: '24px', maxHeight: '24px', objectFit: 'contain', flexShrink: 0 }} /></div><div className="titlebar-tools"><LayoutThemeSelector layoutTheme={layoutTheme} setLayoutTheme={handleLayoutThemeChange} /><ThemeSelector themeKey={themeKey} mode={mode} setThemeKey={setThemeKey} setMode={setMode} /><WindowControls /></div></header>
+    <header className="titlebar"><div className="drag-region"><img src={activeLogo} onError={(e) => { if (e.currentTarget.src !== logoDark) e.currentTarget.src = logoDark }} alt="Logpile" className="w-6 h-6 object-contain flex-shrink-0 shrink-0 aspect-square rounded select-none pointer-events-none app-logo titlebar-logo" style={{ width: '24px', height: '24px', minWidth: '24px', minHeight: '24px', maxWidth: '24px', maxHeight: '24px', objectFit: 'contain', flexShrink: 0 }} /></div><div className="titlebar-tools"><LayoutThemeSelector layoutTheme={layoutTheme} setLayoutTheme={handleLayoutThemeChange} /><ThemeSelector themeKey={themeKey} mode={mode} setThemeKey={setThemeKey} setMode={setMode} /><WindowControls /></div></header>
     <div className="app-body">
       <aside className={cn("sidebar", sidebarCollapsed && "is-collapsed")}>
         <div className="sidebar-top">
           <div className="sidebar-brand-wrap">
-            <img src={logo} alt="Logpile" className="w-8 h-8 object-contain flex-shrink-0 shrink-0 aspect-square rounded-md select-none" style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px', maxWidth: '32px', maxHeight: '32px', objectFit: 'contain', flexShrink: 0 }} />
-            {!sidebarCollapsed && <span className="font-bold text-xl tracking-tight text-white sidebar-brand-name">Logpile</span>}
+            <img src={activeLogo} onError={(e) => { if (e.currentTarget.src !== logoDark) e.currentTarget.src = logoDark }} alt="Logpile" className="w-8 h-8 object-contain flex-shrink-0 shrink-0 aspect-square rounded-md select-none app-logo sidebar-brand-logo" style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px', maxWidth: '32px', maxHeight: '32px', objectFit: 'contain', flexShrink: 0 }} />
+            {!sidebarCollapsed && <span className="font-bold text-xl tracking-tight sidebar-brand-name">Logpile</span>}
           </div>
           <button
             type="button"
@@ -4498,7 +4844,6 @@ function App() {
           >
             <Settings2 size={17} />
             <span>Settings</span>
-            {stats.hiddenGames ? <em>{stats.hiddenGames}</em> : null}
           </button>
           <button
             className={cn('nav-item', view === 'about' && 'active')}
@@ -4528,14 +4873,69 @@ function App() {
     setNoticeTone('error')
     setNotice(err.message || 'Failed to update favorite.')
   }
-}} onUpdateBacklog={async (game, status) => {
+}} onUpdateStatus={async (game, newStatus) => {
+  const allowed = ['unplayed', 'playing', 'paused', 'completed']
+  if (!allowed.includes(newStatus)) return
+
+  const backlogVal = ['unplayed', 'playing', 'completed'].includes(newStatus)
+    ? newStatus
+    : (game.backlog_status === 'dropped' ? 'dropped' : 'playing')
+  const completedAt = newStatus === 'completed' ? (game.completed_at || new Date().toISOString()) : null
+
+  // 1. Instant Optimistic Update
+  const optimisticGame = {
+    ...game,
+    status: newStatus,
+    backlog_status: backlogVal,
+    completed_at: completedAt,
+  }
+  setActiveGame(optimisticGame)
+  setGames((prev) => prev.map((g) => (g.id === game.id ? { ...g, ...optimisticGame } : g)))
+
+  const labelMap = {
+    playing: 'Playing',
+    paused: 'On Pause',
+    completed: 'Completed',
+    unplayed: 'Unplayed',
+  }
+  setNoticeTone('success')
+  setNotice(`Marked "${game.canonical_title}" as ${labelMap[newStatus] || newStatus}.`)
+  window.setTimeout(() => setNotice(''), 3000)
+
+  // 2. Local SQLite Persistence via IPC
   try {
-    await api.database.updateGameMetadata(game.id, { backlog_status: status })
-    const updated = { ...game, backlog_status: status }
-    setActiveGame(updated)
-    setNoticeTone('success')
-    setNotice(`Marked "${game.canonical_title}" as ${status.charAt(0).toUpperCase() + status.slice(1)}.`)
-    window.setTimeout(() => setNotice(''), 3000)
+    const updateFn = api.database?.updateGameStatus || api.updateGameStatus
+    let updated = null
+    if (updateFn) {
+      updated = await updateFn(game.id, newStatus)
+    } else {
+      updated = await api.database.updateGameMetadata(game.id, {
+        status: newStatus,
+        backlog_status: backlogVal,
+        completed_at: completedAt,
+      })
+    }
+    if (updated && typeof updated === 'object') {
+      setActiveGame((prev) => ({ ...prev, ...updated }))
+      setGames((prev) => prev.map((g) => (g.id === game.id ? { ...g, ...updated } : g)))
+    }
+    await loadData({ preserveScroll: true })
+  } catch (err) {
+    console.error('[App] Failed to update game status:', err)
+    setNoticeTone('error')
+    setNotice(err.message || 'Failed to persist status change.')
+  }
+}} onUpdateBacklog={async (game, status) => {
+  const mapped = status === 'dropped' ? 'paused' : status
+  const backlogVal = ['unplayed', 'playing', 'completed'].includes(mapped) ? mapped : 'playing'
+  const completedAt = mapped === 'completed' ? (game.completed_at || new Date().toISOString()) : null
+  const optimisticGame = { ...game, status: mapped, backlog_status: backlogVal, completed_at: completedAt }
+  setActiveGame(optimisticGame)
+  setGames((prev) => prev.map((g) => (g.id === game.id ? { ...g, ...optimisticGame } : g)))
+  try {
+    const updateFn = api.database?.updateGameStatus || api.updateGameStatus
+    if (updateFn) await updateFn(game.id, mapped)
+    else await api.database.updateGameMetadata(game.id, { backlog_status: status })
     await loadData({ preserveScroll: true })
   } catch (err) {
     setNoticeTone('error')
@@ -4550,7 +4950,7 @@ function App() {
 }} onGameUpdated={(updated) => {
   setActiveGame(updated)
   loadData({ preserveScroll: true })
-}} /> : <section className="library-section library-pure-games"><div className="library-top-bar"><div className="library-top-bar-left"><CustomDropdown value={sortKey} onChange={setSortKey} options={sortOptions} icon={ArrowDownAZ} className="top-bar-dropdown" title="Sort games" /><CustomDropdown value={genreFilter} onChange={setGenreFilter} options={genreOptions} icon={Filter} className="top-bar-dropdown" title="Filter by genre" /><CustomDropdown value={backlogFilter} onChange={setBacklogFilter} options={backlogOptions} icon={SlidersHorizontal} className="top-bar-dropdown" title="Filter by backlog status" /><div className="top-bar-chip-group"><button type="button" className={cn('top-bar-chip', qualityFilters.includes('missingArtwork') && 'active')} onClick={() => setQualityFilters((current) => current.includes('missingArtwork') ? current.filter((item) => item !== 'missingArtwork') : [...current, 'missingArtwork'])}>Missing Artwork</button><button type="button" className={cn('top-bar-chip', qualityFilters.includes('missingIds') && 'active')} onClick={() => setQualityFilters((current) => current.includes('missingIds') ? current.filter((item) => item !== 'missingIds') : [...current, 'missingIds'])}>Missing IDs</button></div></div><div className="library-top-bar-right"><button type="button" className={cn('outline-button', selectMode && 'active')} onClick={() => { setSelectMode((current) => !current); if (selectMode) setSelectedIds([]) }}><Check size={14} /><span>{selectMode ? 'Exit select' : 'Select mode'}</span></button><button type="button" className="outline-button" onClick={() => setScanOpen(true)}><ScanLine size={14} /><span>Scan & import</span></button></div></div>{selectMode ? <div className="bulk-action-bar"><span><Check size={14} /> {selectedIds.length} selected · {filteredRecordIds.length} filtered</span><div className="bulk-action-group"><button className="outline-button" disabled={bulkBusy || !filteredRecordIds.length} onClick={selectAllFiltered}><Check size={14} /> Select All Filtered</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={deselectAll}><X size={14} /> Deselect All</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={() => handleBulkMove('dlc')}><PackageOpen size={14} /> Move to DLC</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={handleBulkHide}><EyeOff size={14} /> Hide from Library</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={handleRefetchSelected}><RefreshCw size={14} /> Re-fetch Artwork</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={handleExportSelected}><FileDown size={14} /> Export Selected to CSV</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={() => setBulkEditOpen(true)}><SlidersHorizontal size={14} /> Edit Selected</button><button className="danger-button" disabled={bulkBusy || !selectedIds.length} onClick={handleDeleteSelected}><Trash2 size={14} /> Delete Selected</button></div></div> : null}{notice ? <div className={cn('notice', noticeTone === 'error' && 'notice-error', noticeTone === 'warning' && 'notice-warning')}>{noticeTone === 'error' ? <X size={14} /> : noticeTone === 'warning' ? <AlertTriangle size={14} /> : <Check size={14} />} {notice}</div> : null}{loading ? <div className="empty-state"><div className="loader" /> Loading and indexing your library…</div> : filteredGames.length ? <ErrorBoundary><VirtualGrid games={filteredGames} onLaunch={handleLaunch} onSelect={handleSelectGame} onHideGame={(game) => updateHiddenState(game, true)} onMoveCategory={moveCategory} onEditGame={setEditorGame} onContextMenu={handleCardContextMenu} onArtworkChanged={handleArtworkChanged} onArtworkError={handleArtworkError} selectMode={selectMode} selectedIds={selectedIds} onToggleSelect={toggleGameSelection} scrollElementRef={mainScrollRef} onImageError={handleImageError} initialScrollTop={activeGame?.id === lastClickedGameIdRef.current ? libraryScrollRef.current : 0} restoreGameId={activeGame?.id || lastClickedGameIdRef.current} restoredGameId={restoredGameId} /></ErrorBoundary> : (!games.length && !query && !sourceFilters.length && genreFilter === 'all' && backlogFilter === 'all' && !qualityFilters.length) ? <div className="empty-state"><strong>Your library is empty.</strong><span>Click Scan & import (top right) to add your games.</span></div> : <div className="empty-state"><Search size={21} /><span>No titles match these filters.</span></div>}</section>}</ErrorBoundary></div><footer className="statusbar"><span><TerminalSquare size={13} /> {scannerStatus ? <span className="inline-flex items-center gap-1.5"><span className="pulse-dot" /> {scannerStatus}</span> : 'Ready'}</span><span><span className="pulse-dot" /> Offline · Local storage</span><span>Version 1.0.0</span></footer></main>
+}} /> : <section className="library-section library-pure-games"><div className="library-top-bar"><div className="library-top-bar-left"><CustomDropdown value={sortKey} onChange={setSortKey} options={sortOptions} icon={ArrowDownAZ} className="top-bar-dropdown" title="Sort games" /><CustomDropdown value={genreFilter} onChange={setGenreFilter} options={genreOptions} icon={Filter} className="top-bar-dropdown" title="Filter by genre" /><CustomDropdown value={backlogFilter} onChange={setBacklogFilter} options={backlogOptions} icon={SlidersHorizontal} className="top-bar-dropdown" title="Filter by backlog status" /><div className="top-bar-chip-group"><button type="button" className={cn('top-bar-chip', qualityFilters.includes('missingArtwork') && 'active')} onClick={() => setQualityFilters((current) => current.includes('missingArtwork') ? current.filter((item) => item !== 'missingArtwork') : [...current, 'missingArtwork'])}>Missing Artwork</button><button type="button" className={cn('top-bar-chip', qualityFilters.includes('missingIds') && 'active')} onClick={() => setQualityFilters((current) => current.includes('missingIds') ? current.filter((item) => item !== 'missingIds') : [...current, 'missingIds'])}>Missing IDs</button></div></div><div className="library-top-bar-right"><button type="button" className={cn('outline-button', selectMode && 'active')} onClick={() => { setSelectMode((current) => !current); if (selectMode) setSelectedIds([]) }}><Check size={14} /><span>{selectMode ? 'Exit select' : 'Select mode'}</span></button><button type="button" className="outline-button" onClick={() => setScanOpen(true)}><ScanLine size={14} /><span>Scan & import</span></button></div></div>{selectMode ? <div className="bulk-action-bar"><span><Check size={14} /> {selectedIds.length} selected · {filteredRecordIds.length} filtered</span><div className="bulk-action-group"><button className="outline-button" disabled={bulkBusy || !filteredRecordIds.length} onClick={selectAllFiltered}><Check size={14} /> Select All Filtered</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={deselectAll}><X size={14} /> Deselect All</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={() => handleBulkMove('dlc')}><PackageOpen size={14} /> Move to DLC</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={handleBulkHide}><EyeOff size={14} /> Hide from Library</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={handleRefetchSelected}><RefreshCw size={14} /> Re-fetch Artwork</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={handleExportSelected}><FileDown size={14} /> Export Selected to CSV</button><button className="outline-button" disabled={bulkBusy || !selectedIds.length} onClick={() => setBulkEditOpen(true)}><SlidersHorizontal size={14} /> Edit Selected</button><button className="danger-button" disabled={bulkBusy || !selectedIds.length} onClick={handleDeleteSelected}><Trash2 size={14} /> Delete Selected</button></div></div> : null}{notice ? <div className={cn('notice', noticeTone === 'error' && 'notice-error', noticeTone === 'warning' && 'notice-warning')}>{noticeTone === 'error' ? <X size={14} /> : noticeTone === 'warning' ? <AlertTriangle size={14} /> : <Check size={14} />} {notice}</div> : null}{loading ? <div className="empty-state"><div className="loader" /> Loading and indexing your library…</div> : filteredGames.length ? <ErrorBoundary><VirtualGrid games={filteredGames} onLaunch={handleLaunch} onSelect={handleSelectGame} onHideGame={(game) => updateHiddenState(game, true)} onMoveCategory={moveCategory} onEditGame={setEditorGame} onContextMenu={handleCardContextMenu} onArtworkChanged={handleArtworkChanged} onArtworkError={handleArtworkError} selectMode={selectMode} selectedIds={selectedIds} onToggleSelect={toggleGameSelection} scrollElementRef={mainScrollRef} onImageError={handleImageError} initialScrollTop={activeGame?.id === lastClickedGameIdRef.current ? libraryScrollRef.current : 0} restoreGameId={activeGame?.id || lastClickedGameIdRef.current} restoredGameId={restoredGameId} /></ErrorBoundary> : (!games.length && !query && !sourceFilters.length && genreFilter === 'all' && backlogFilter === 'all' && !qualityFilters.length) ? <div className="empty-state"><strong>Your library is empty.</strong><span>Click Scan & import (top right) to add your games.</span></div> : <div className="empty-state"><Search size={21} /><span>No titles match these filters.</span></div>}</section>}</ErrorBoundary></div><footer className="statusbar"><span><TerminalSquare size={13} /> {scannerStatus ? <span className="inline-flex items-center gap-1.5"><span className="pulse-dot" /> {scannerStatus}</span> : 'Ready'}</span><span><span className="pulse-dot" /> Offline · Local storage</span><span>Version 1.1.0</span></footer></main>
     </div><ScanImportPanel open={scanOpen} onClose={() => setScanOpen(false)} onRefresh={loadData} /><GameEditorModal game={editorGame} onClose={() => setEditorGame(null)} onSaved={handleEditorSaved} /><PurgeConfirmModal open={purgeOpen} busy={purgeBusy} onClose={() => setPurgeOpen(false)} onConfirm={handlePurge} /><BulkEditModal open={bulkEditOpen} count={selectedIds.length} busy={bulkBusy} onClose={() => setBulkEditOpen(false)} onApply={handleBulkApply} /><ContextMenu menu={contextMenu} menuRef={contextMenuRef} onClose={() => setContextMenu(null)} onMoveCategory={moveCategory} onEditGame={setEditorGame} onHideGame={(game) => updateHiddenState(game, true)} onArtworkChanged={handleArtworkChanged} onArtworkError={handleArtworkError} /><ConfirmActionModal config={confirmModal} onClose={() => setConfirmModal(null)} /><BackupsManagerModal open={backupsModalOpen} busy={backupBusy || restoreBusy} backups={backupsList} loading={backupsLoading} backupsDirectory={backupsDirectory || libraryHealth?.backupsDirectory} onClose={() => setBackupsModalOpen(false)} onBackupNow={handleBackupNow} onOpenFolder={handleOpenBackupsFolder} onRestoreBackup={handleRestoreBackup} onChooseAndRestoreFile={handleChooseAndRestoreFile} /></div>
 }
 export default App

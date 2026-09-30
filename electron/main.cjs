@@ -32,6 +32,7 @@ const {
   seedIfEmpty,
   getGames,
   setGameHidden,
+  updateGameStatus,
   updateGameMetadata,
   deleteGames,
   bulkUpdateGames,
@@ -647,6 +648,34 @@ function registerIpc() {
       throw new Error('Invalid hidden-game request.')
     }
     const updated = setGameHidden(db, gameId, hidden)
+    mainWindow?.webContents.send('library:updated', updated)
+    return updated
+  })
+  ipcMain.handle('db:update-game-status', (_event, arg1, arg2) => {
+    let gameId = arg1
+    let status = arg2
+    if (arg1 && typeof arg1 === 'object') {
+      gameId = arg1.id ?? arg1.gameId
+      status = arg1.status
+    }
+    if (!gameId || typeof status !== 'string') {
+      throw new Error('Invalid game status update request.')
+    }
+    const updated = updateGameStatus(db, String(gameId), status)
+    mainWindow?.webContents.send('library:updated', updated)
+    return updated
+  })
+  ipcMain.handle('db:updateGameStatus', (_event, arg1, arg2) => {
+    let gameId = arg1
+    let status = arg2
+    if (arg1 && typeof arg1 === 'object') {
+      gameId = arg1.id ?? arg1.gameId
+      status = arg1.status
+    }
+    if (!gameId || typeof status !== 'string') {
+      throw new Error('Invalid game status update request.')
+    }
+    const updated = updateGameStatus(db, String(gameId), status)
     mainWindow?.webContents.send('library:updated', updated)
     return updated
   })

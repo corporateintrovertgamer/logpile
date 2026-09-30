@@ -1,0 +1,126 @@
+/* ==========================================================================
+   LOGPILE THEME SYSTEM - 2-TIER TOKEN HIERARCHY
+   ========================================================================== */
+
+/* Tier 1: Semantic Base (Defaults to Dark Mode) */
+:root {
+  --bg-app: #0a0c10;
+  --bg-surface: #12151c;
+  --bg-surface-elevated: #1a1e27;
+  --bg-card: rgba(18, 21, 28, 0.8);
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --accent: #d6ff4b;
+  --accent-glow: rgba(214, 255, 75, 0.25);
+  --accent-contrast: #0a0c10;
+
+  --status-playing: #38bdf8;
+  --status-completed: #34d399;
+
+  --app-logo: url('../assets/logo-dark.png');
+}
+
+/* Light Mode Overrides */
+[data-mode="light"] {
+  /* Canvas & Base Surfaces */
+  --bg-app: #f1f5f9;                    /* Soft cool gray app canvas */
+  --bg-surface: #ffffff;                /* Main elevated panels, sidebars, modals */
+  --bg-surface-elevated: #e2e8f0;       /* Inputs, chip hover, subtle plates */
+  --bg-card: #ffffff;                   /* Game cards, settings tiles, popovers */
+
+  /* Hairline Borders (Subtle, never heavy) */
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.16);
+
+  /* Typography */
+  --text-primary: #0f172a;              /* Crisp slate-900 */
+  --text-secondary: #475569;            /* Slate-600 */
+  --text-muted: #94a3b8;                /* Slate-400 */
+
+  /* Elevation Shadows */
+  --shadow-ambient: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --card-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  --modal-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+
+  --accent-contrast: #ffffff;
+
+  --app-logo: url('../assets/logo-light.png');
+}
+
+/* Tier 2: 10 Palettes (Mapped by [data-palette="..."]) */
+[data-palette="the-monolith"],
+[data-palette="monolith"] { --accent: #38bdf8; --accent-glow: rgba(56, 189, 248, 0.25); }
+
+[data-palette="the-brutalist-sanctuary"],
+[data-palette="brutalist"] { --accent: #ef4444; --accent-glow: rgba(239, 68, 68, 0.25); }
+
+[data-palette="the-eerie-calm"],
+[data-palette="eerie"] { --accent: #06b6d4; --accent-glow: rgba(6, 182, 212, 0.25); }
+
+[data-palette="the-wasteland-horizon"],
+[data-palette="wasteland"] { --accent: #84cc16; --accent-glow: rgba(132, 204, 22, 0.25); }
+
+[data-palette="the-system-glitch"],
+[data-palette="glitch"] { --accent: #d946ef; --accent-glow: rgba(217, 70, 239, 0.25); }
+
+[data-palette="the-overgrown-ruins"],
+[data-palette="ruins"] { --accent: #22c55e; --accent-glow: rgba(34, 197, 94, 0.25); }
+
+[data-palette="the-neon-syndicate"],
+[data-palette="syndicate"] { --accent: #f43f5e; --accent-glow: rgba(244, 63, 94, 0.25); }
+
+[data-palette="the-submerged-base"],
+[data-palette="submerged"] { --accent: #14b8a6; --accent-glow: rgba(20, 184, 166, 0.25); }
+
+[data-palette="the-ash-ember"],
+[data-palette="ember"] { --accent: #f97316; --accent-glow: rgba(249, 115, 22, 0.25); }
+
+[data-palette="the-sterile-lab"],
+[data-palette="lab"] { --accent: #eab308; --accent-glow: rgba(234, 179, 8, 0.25); }
+
+/* Tier 3: Structural Layout Tokens */
+[data-layout="cinematic"],
+[data-layout-theme="cinematic"] {
+  --radius-card: 16px;
+  --card-gap: 2rem;
+  --font-family: inherit;
+  --backdrop-blur: 24px;
+}
+
+[data-layout="kinetic"],
+[data-layout-theme="kinetic"] {
+  --radius-card: 0px;
+  --card-gap: 1rem;
+  --font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  --backdrop-blur: 0px;
+}
+
+[data-layout="atmospheric"],
+[data-layout-theme="atmospheric"] {
+  --radius-card: 8px;
+  --card-gap: 1.5rem;
+  --font-family: inherit;
+  --backdrop-blur: 16px;
+}
+
+[data-layout="playful"],
+[data-layout-theme="playful"] {
+  --radius-card: 22px;
+  --card-gap: 1.75rem;
+  --font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --backdrop-blur: 18px;
+}
+
+[data-layout="competitive"],
+[data-layout-theme="competitive"] {
+  --radius-card: 4px;
+  --card-gap: 1rem;
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --backdrop-blur: 8px;
+}

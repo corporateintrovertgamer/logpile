@@ -28,6 +28,49 @@ function cleanArtworkTitle(title) {
   return cleaned || String(title || '').trim()
 }
 
+function findBestAutocompleteMatch(candidates = [], targetTitle) {
+  if (!candidates || !candidates.length || !targetTitle) return null
+  const cleanTarget = cleanArtworkTitle(targetTitle).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+  if (!cleanTarget) return candidates[0] || null
+
+  const targetNumbers = cleanTarget.match(/\b\d+\b/g) || []
+
+  // 1. Exact match on normalized title
+  for (const item of candidates) {
+    if (!item?.name) continue
+    const cleanItem = cleanArtworkTitle(item.name).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+    if (cleanItem === cleanTarget) return item
+  }
+
+  // 2. Candidates whose prefix before ':' or ' - ' exactly matches the target
+  const prefixMatches = candidates.filter(item => {
+    if (!item?.name) return false
+    const itemPrefix = item.name.split(/[:–—]| - /)[0]
+    const cleanPrefix = cleanArtworkTitle(itemPrefix).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+    if (cleanPrefix !== cleanTarget) return false
+    const prefixNumbers = cleanPrefix.match(/\b\d+\b/g) || []
+    return prefixNumbers.length === targetNumbers.length
+  })
+
+  if (prefixMatches.length === 1) return prefixMatches[0]
+  if (prefixMatches.length > 1) {
+    prefixMatches.sort((a, b) => (a.release_date || 9999999999) - (b.release_date || 9999999999))
+    return prefixMatches[0]
+  }
+
+  // 3. Candidates starting with cleanTarget that don't introduce sequel numbers
+  const prefixStartsWith = candidates.filter(item => {
+    if (!item?.name) return false
+    const cleanItem = cleanArtworkTitle(item.name).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+    const itemNumbers = cleanItem.match(/\b\d+\b/g) || []
+    if (targetNumbers.length === 0 && itemNumbers.length > 0) return false
+    return cleanItem.startsWith(cleanTarget)
+  })
+  if (prefixStartsWith.length > 0) return prefixStartsWith[0]
+
+  return candidates[0] || null
+}
+
 function getArtworkDirectory(userDataPath) {
   const dir = path.join(userDataPath, 'artwork_database')
   if (!fsSync.existsSync(dir)) {
@@ -240,7 +283,7 @@ async function fetchSteamStorePoster(title) {
       if (!res.ok) continue
       const data = await res.json()
       if (data?.items?.length > 0) {
-        const match = data.items[0]
+        const match = findBestAutocompleteMatch(data.items, q) || data.items[0]
         if (match?.id) {
           let coverUrl = `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${match.id}/library_600x900.jpg`
           let heroUrl = `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${match.id}/library_hero.jpg`
@@ -456,8 +499,9 @@ async function runBulkArtworkSync(db, userDataPath, apiKey, onProgress, signal, 
             searchRes = await apiGet(`/search/autocomplete/${encodeURIComponent(cleanArtworkTitle(prefix))}`, key, signal).catch(() => [])
           }
         }
-        if (searchRes?.[0]?.id) {
-          resolvedId = String(searchRes[0].id)
+        const bestMatch = findBestAutocompleteMatch(searchRes, game.canonical_title)
+        if (bestMatch?.id) {
+          resolvedId = String(bestMatch.id)
           if (needsCover && !grids.length) grids = await fetchGridsForId(resolvedId, key, signal)
           if (needsHero && !heroes.length) heroes = await fetchHeroesForId(resolvedId, key, signal, heroResolution)
           if (needsLogo && !logos.length) logos = await fetchLogosForId(resolvedId, key, signal)
@@ -663,8 +707,9 @@ async function refetchSelectedArtwork(db, userDataPath, gameIds, apiKey, onProgr
               searchRes = await apiGet(`/search/autocomplete/${encodeURIComponent(cleanArtworkTitle(prefix))}`, key, signal).catch(() => [])
             }
           }
-          if (searchRes?.[0]?.id) {
-            targetId = String(searchRes[0].id)
+          const bestMatch = findBestAutocompleteMatch(searchRes, game.canonical_title)
+          if (bestMatch?.id) {
+            targetId = String(bestMatch.id)
             if (!grids.length) grids = await fetchGridsForId(targetId, key, signal)
             if (!heroes.length) heroes = await fetchHeroesForId(targetId, key, signal, heroResolution)
           }
@@ -935,7 +980,7 @@ async function findSteamAppIdForTitle(title, signal, retryCount = 0) {
           const itLower = String(it.name || '').toLowerCase().trim()
           return itLower === lowerTitle || itLower === lowerClean || (lowerStripped && itLower === lowerStripped)
         })
-        const chosen = exact || data.items[0]
+        const chosen = exact || findBestAutocompleteMatch(data.items, title) || data.items[0]
         if (chosen?.id) return String(chosen.id)
       }
     } catch {}
@@ -1131,7 +1176,8 @@ async function syncLibraryMetadata(db, userDataPath, apiKey, onProgress, signal,
         }
         if (!resolvedSgdbId) {
           const searchRes = await apiGet(`/search/autocomplete/${encodeURIComponent(cleanArtworkTitle(game.canonical_title))}`, key, signal).catch(() => [])
-          if (searchRes?.[0]?.id) resolvedSgdbId = String(searchRes[0].id)
+          const bestMatch = findBestAutocompleteMatch(searchRes, game.canonical_title)
+          if (bestMatch?.id) resolvedSgdbId = String(bestMatch.id)
         }
       } catch {}
     }
@@ -1366,8 +1412,9 @@ async function syncLibraryMetadataAndArt(db, userDataPath, apiKey, onProgress, s
             searchRes = await apiGet(`/search/autocomplete/${encodeURIComponent(cleanArtworkTitle(prefix))}`, key, signal).catch(() => [])
           }
         }
-        if (searchRes?.[0]?.id) {
-          resolvedId = String(searchRes[0].id)
+        const bestMatch = findBestAutocompleteMatch(searchRes, game.canonical_title)
+        if (bestMatch?.id) {
+          resolvedId = String(bestMatch.id)
           if (needsCover && !grids.length) grids = await fetchGridsForId(resolvedId, key, signal)
           if (needsHero && !heroes.length) heroes = await fetchHeroesForId(resolvedId, key, signal, heroResolution)
           if (needsLogo && !logos.length) logos = await fetchLogosForId(resolvedId, key, signal)

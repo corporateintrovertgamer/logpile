@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('api', {
   selectCustomArtwork: (gameId) => ipcRenderer.invoke('selectCustomArtwork', gameId),
   clearArtCache: () => ipcRenderer.invoke('clear-art-cache'),
   setGameCategory: (gameId, category) => ipcRenderer.invoke('games:setCategory', gameId, category),
+  updateGameStatus: (gameId, status) => ipcRenderer.invoke('db:update-game-status', gameId, status),
   window: {
     minimize: () => ipcRenderer.invoke('window:minimize'),
     maximize: () => ipcRenderer.invoke('window:maximize'),
@@ -28,6 +29,7 @@ contextBridge.exposeInMainWorld('api', {
     exportSelectedCsv: (gameIds) => ipcRenderer.invoke('db:exportSelectedCsv', gameIds),
     purgeLibrary: () => ipcRenderer.invoke('db:purgeLibrary'),
     setGameHidden: (gameId, hidden) => ipcRenderer.invoke('db:setGameHidden', gameId, hidden),
+    updateGameStatus: (gameId, status) => ipcRenderer.invoke('db:update-game-status', gameId, status),
     updateGameMetadata: (gameId, fields) => ipcRenderer.invoke('db:updateGameMetadata', gameId, fields),
     deleteGames: (gameIds) => ipcRenderer.invoke('db:deleteGames', gameIds),
     bulkUpdateGames: (gameIds, fields) => ipcRenderer.invoke('db:bulkUpdateGames', gameIds, fields),

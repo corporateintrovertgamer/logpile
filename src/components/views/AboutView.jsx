@@ -28,13 +28,13 @@ export function AboutView() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold text-[var(--text-primary)]">
-                Logpile Desktop <span className="text-[var(--text-muted)] font-normal text-2xl">Version 1.0.0</span>
+                Logpile Desktop <span className="text-[var(--text-muted)] font-normal text-2xl">Version 1.1.0</span>
               </h1>
               <p className="text-xl text-[var(--text-secondary)] mt-1">An offline-first, local game library manager.</p>
             </div>
             <div className="flex flex-col items-start sm:items-end gap-1.5 shrink-0 pt-1">
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-[var(--text-secondary)]">Current version: 1.0.0</span>
+                <span className="text-sm font-medium text-[var(--text-secondary)]">Current version: 1.1.0</span>
                 <a
                   href="https://github.com/corporateintrovertgamer/logpile/releases"
                   target="_blank"

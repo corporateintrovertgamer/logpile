@@ -101,6 +101,8 @@ function createDatabase(dbPath) {
       play_time_seconds INTEGER DEFAULT 0,
       last_played TEXT,
       backlog_status TEXT DEFAULT 'unplayed' CHECK(backlog_status IN ('unplayed', 'playing', 'completed', 'dropped')),
+      status TEXT DEFAULT 'unplayed' CHECK(status IN ('unplayed', 'playing', 'paused', 'completed')),
+      completed_at TEXT,
       user_rating REAL DEFAULT 0,
       is_favorite INTEGER DEFAULT 0,
       is_utility INTEGER DEFAULT 0,
@@ -191,6 +193,11 @@ function createDatabase(dbPath) {
   if (!columns.includes('metadata_sync_status')) db.exec("ALTER TABLE games ADD COLUMN metadata_sync_status TEXT DEFAULT 'pending'")
   if (!columns.includes('is_hidden')) db.exec('ALTER TABLE games ADD COLUMN is_hidden INTEGER DEFAULT 0')
   if (!columns.includes('hidden_reason')) db.exec('ALTER TABLE games ADD COLUMN hidden_reason TEXT')
+  if (!columns.includes('status')) db.exec("ALTER TABLE games ADD COLUMN status TEXT DEFAULT 'unplayed'")
+  if (!columns.includes('completed_at')) db.exec('ALTER TABLE games ADD COLUMN completed_at TEXT')
+  try {
+    db.prepare("UPDATE games SET status = COALESCE(NULLIF(status, ''), backlog_status, 'unplayed') WHERE status IS NULL OR status = ''").run()
+  } catch {}
   db.exec('CREATE INDEX IF NOT EXISTS idx_games_is_dlc ON games(is_dlc)')
   enforceUtilityClassification(db)
   enforceHiddenClassification(db)
@@ -257,6 +264,8 @@ function getGames(db, filters = {}, sort = {}) {
   `).all(params)
   return rows.map((row) => ({
     ...row,
+    status: row.status || row.backlog_status || 'unplayed',
+    completed_at: row.completed_at || null,
     is_installed: Boolean(row.is_installed),
     is_favorite: Boolean(row.is_favorite),
     is_utility: Boolean(row.is_utility),
@@ -272,6 +281,68 @@ function setGameHidden(db, gameId, hidden) {
   const result = db.prepare("UPDATE games SET is_hidden = ?, hidden_reason = CASE WHEN ? = 1 THEN COALESCE(hidden_reason, 'manual') ELSE 'user-visible' END, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(value, value, gameId)
   if (!result.changes) throw new Error('The selected game could not be updated.')
   return db.prepare('SELECT id, canonical_title, is_hidden, hidden_reason FROM games WHERE id = ?').get(gameId)
+}
+
+function updateGameStatus(db, gameId, status) {
+  if (!gameId) throw new Error('Game ID is required')
+  const allowed = ['unplayed', 'playing', 'paused', 'completed']
+  const cleanStatus = String(status || '').trim().toLowerCase()
+  if (!allowed.includes(cleanStatus)) {
+    throw new Error(`Invalid status: ${status}. Must be one of: ${allowed.join(', ')}`)
+  }
+
+  const current = db.prepare('SELECT id, status, backlog_status, completed_at FROM games WHERE id = ?').get(gameId)
+  if (!current) throw new Error(`Game not found: ${gameId}`)
+
+  const completedAt = cleanStatus === 'completed'
+    ? (current.completed_at || new Date().toISOString())
+    : null
+
+  const backlogVal = ['unplayed', 'playing', 'completed'].includes(cleanStatus)
+    ? cleanStatus
+    : (current.backlog_status === 'dropped' ? 'dropped' : 'playing')
+
+  db.prepare(`
+    UPDATE games SET
+      status = ?,
+      backlog_status = ?,
+      completed_at = ?,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(cleanStatus, backlogVal, completedAt, gameId)
+
+  const updatedRow = db.prepare(`
+    SELECT g.*,
+      COALESCE(json_group_array(json_object(
+        'platform', ${platformKeySql('gs.platform')},
+        'platformGameId', gs.platform_game_id,
+        'platformLaunchId', gs.platform_launch_id,
+        'idSource', gs.id_source,
+        'launchUri', gs.launch_uri,
+        'playTimeSeconds', gs.play_time_seconds,
+        'sourceName', gs.source_name,
+        'ownershipStatus', gs.ownership_status
+      )), '[]') AS sources_json
+    FROM games g
+    LEFT JOIN game_sources gs ON gs.game_id = g.id
+    WHERE g.id = ?
+    GROUP BY g.id
+  `).get(gameId)
+
+  if (!updatedRow) return db.prepare('SELECT * FROM games WHERE id = ?').get(gameId)
+
+  return {
+    ...updatedRow,
+    status: updatedRow.status || updatedRow.backlog_status || 'unplayed',
+    completed_at: updatedRow.completed_at || null,
+    is_installed: Boolean(updatedRow.is_installed),
+    is_favorite: Boolean(updatedRow.is_favorite),
+    is_utility: Boolean(updatedRow.is_utility),
+    is_dlc: Boolean(updatedRow.is_dlc),
+    is_hidden: Boolean(updatedRow.is_hidden),
+    sources: JSON.parse(updatedRow.sources_json).filter((source) => source.platform !== null),
+    install_size_gb: Number((updatedRow.install_size_bytes / (1024 ** 3)).toFixed(2)),
+  }
 }
 
 function getLibrarySettings(db) {
@@ -706,4 +777,4 @@ function deleteUserCapture(db, captureId) {
   return db.prepare('DELETE FROM user_captures WHERE id = ?').run(captureId)
 }
 
-module.exports = { createDatabase, seedIfEmpty, getGames, setGameHidden, updateGameMetadata, deleteGames, bulkUpdateGames, moveGameCategory, bulkMoveGameCategory, bulkSetGameHidden, getLibrarySettings, setLibrarySettings, getActivityLog, logActivity, getAppConfig, setAppConfig, getLibraryHealth, getRandomInstalledGame, getLibraryStats, exportLibraryCsv, exportSelectedCsv, purgeLibrary, enforceUtilityClassification, enforceDlcClassification, getUserCaptures, addUserCapture, deleteUserCapture }
+module.exports = { createDatabase, seedIfEmpty, getGames, setGameHidden, updateGameStatus, updateGameMetadata, deleteGames, bulkUpdateGames, moveGameCategory, bulkMoveGameCategory, bulkSetGameHidden, getLibrarySettings, setLibrarySettings, getActivityLog, logActivity, getAppConfig, setAppConfig, getLibraryHealth, getRandomInstalledGame, getLibraryStats, exportLibraryCsv, exportSelectedCsv, purgeLibrary, enforceUtilityClassification, enforceDlcClassification, getUserCaptures, addUserCapture, deleteUserCapture }
