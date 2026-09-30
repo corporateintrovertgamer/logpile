@@ -3248,29 +3248,69 @@ body {
   transform: rotate(180deg);
 }
 
-/* Dropdown menu container */
+/* Dropdown menu container (Portaled to document.body) */
 .status-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  min-width: 250px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
+  position: fixed;
+  min-width: 260px;
+  max-width: 320px;
+  background: var(--bg-surface, #141721);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.14));
   border-radius: var(--radius-md, 8px);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-color);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-color, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   padding: 6px;
-  z-index: 1000;
+  z-index: 999999;
   display: flex;
   flex-direction: column;
   gap: 3px;
-  animation: statusMenuFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
-@keyframes statusMenuFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
+.status-dropdown-menu.open-downwards {
+  transform: translateY(0);
+  animation: statusMenuFadeInDown 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.status-dropdown-menu.open-upwards {
+  transform: translateY(-100%);
+  animation: statusMenuFadeInUp 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes statusMenuFadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes statusMenuFadeInUp {
+  from { opacity: 0; transform: translateY(calc(-100% + 6px)); }
+  to { opacity: 1; transform: translateY(-100%); }
+}
+
+[data-mode='light'] .status-dropdown-menu {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, rgba(15, 23, 42, 0.15));
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+[data-mode='light'] .status-dropdown-menu .status-menu-item:hover,
+[data-mode='light'] .status-dropdown-menu .status-menu-item.is-focused {
+  background: rgba(15, 23, 42, 0.05);
+  color: #0f172a;
+}
+
+[data-mode='light'] .status-dropdown-menu .status-menu-item.is-selected {
+  background: rgba(15, 23, 42, 0.07);
+  border-color: var(--accent);
+  color: #0f172a;
+}
+
+[data-mode='light'] .status-dropdown-menu .status-item-label {
+  color: #0f172a;
+}
+
+[data-mode='light'] .status-dropdown-menu .status-item-subtext {
+  color: #64748b;
 }
 
 .status-menu-header {

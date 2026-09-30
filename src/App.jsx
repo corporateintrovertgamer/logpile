@@ -1,4 +1,5 @@
 import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {
   Activity, Archive, ArrowDownAZ, ArrowLeft, ArrowUpAZ, Check, ChevronDown, CircleHelp, Cpu, Database, Download,
@@ -2717,7 +2718,8 @@ const SANCTUARY_STATUS_OPTIONS = [
 function SanctuaryStatusDropdown({ game, onStatusChange }) {
   const [open, setOpen] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(-1)
-  const anchorRef = useRef(null)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, openUpwards: false })
+  const triggerRef = useRef(null)
   const menuRef = useRef(null)
 
   const currentKey = useMemo(() => {
@@ -2731,15 +2733,68 @@ function SanctuaryStatusDropdown({ game, onStatusChange }) {
     [currentKey]
   )
 
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return
+    const rect = triggerRef.current.getBoundingClientRect()
+    const menuEstimatedHeight = 240
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    const openUpwards = spaceBelow < menuEstimatedHeight && spaceAbove > 140
+
+    const menuWidth = 260
+    let left = rect.left
+    if (left + menuWidth > window.innerWidth - 16) {
+      left = Math.max(16, window.innerWidth - menuWidth - 16)
+    }
+    if (left < 16) left = 16
+
+    setMenuPosition({
+      top: openUpwards ? rect.top - 8 : rect.bottom + 8,
+      left,
+      openUpwards,
+    })
+  }, [])
+
+  const toggle = () => {
+    if (!open) {
+      updatePosition()
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
+  }
+
+  useLayoutEffect(() => {
+    if (open) {
+      updatePosition()
+    }
+  }, [open, updatePosition])
+
   useEffect(() => {
     if (!open) return
-    const handleOutside = (e) => {
-      if (anchorRef.current && !anchorRef.current.contains(e.target)) {
+    const handleReposition = () => updatePosition()
+    window.addEventListener('resize', handleReposition)
+    window.addEventListener('scroll', handleReposition, true)
+    return () => {
+      window.removeEventListener('resize', handleReposition)
+      window.removeEventListener('scroll', handleReposition, true)
+    }
+  }, [open, updatePosition])
+
+  useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (e) => {
+      if (
+        triggerRef.current &&
+        !triggerRef.current.contains(e.target) &&
+        menuRef.current &&
+        !menuRef.current.contains(e.target)
+      ) {
         setOpen(false)
       }
     }
-    window.addEventListener('pointerdown', handleOutside)
-    return () => window.removeEventListener('pointerdown', handleOutside)
+    document.addEventListener('pointerdown', handleClickOutside, true)
+    return () => document.removeEventListener('pointerdown', handleClickOutside, true)
   }, [open])
 
   useEffect(() => {
@@ -2753,9 +2808,10 @@ function SanctuaryStatusDropdown({ game, onStatusChange }) {
 
   const handleKeyDown = (e) => {
     if (!open) {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         e.stopPropagation()
+        updatePosition()
         setOpen(true)
       }
       return
@@ -2765,7 +2821,7 @@ function SanctuaryStatusDropdown({ game, onStatusChange }) {
       e.preventDefault()
       e.stopPropagation()
       setOpen(false)
-      anchorRef.current?.querySelector('button.status-dropdown-pill')?.focus()
+      triggerRef.current?.querySelector('button.status-dropdown-pill')?.focus()
       return
     }
 
@@ -2792,6 +2848,7 @@ function SanctuaryStatusDropdown({ game, onStatusChange }) {
         if (selected !== currentKey) {
           onStatusChange?.(selected)
         }
+        triggerRef.current?.querySelector('button.status-dropdown-pill')?.focus()
       }
     }
   }
@@ -2801,18 +2858,72 @@ function SanctuaryStatusDropdown({ game, onStatusChange }) {
     if (key !== currentKey) {
       onStatusChange?.(key)
     }
+    triggerRef.current?.querySelector('button.status-dropdown-pill')?.focus()
   }
+
+  const menu = open ? (
+    <div
+      ref={menuRef}
+      role="listbox"
+      aria-label="Select Game Progress Status"
+      className={cn(
+        'status-dropdown-menu',
+        menuPosition.openUpwards ? 'open-upwards' : 'open-downwards'
+      )}
+      style={{
+        position: 'fixed',
+        top: `${menuPosition.top}px`,
+        left: `${menuPosition.left}px`,
+        zIndex: 999999,
+      }}
+      onKeyDown={handleKeyDown}
+    >
+      <div className="status-menu-header">Sanctuary Status</div>
+      {SANCTUARY_STATUS_OPTIONS.map((opt, idx) => {
+        const isSelected = opt.key === currentKey
+        const isFocused = idx === focusedIndex
+        return (
+          <button
+            key={opt.key}
+            type="button"
+            role="option"
+            aria-selected={isSelected}
+            tabIndex={-1}
+            className={cn(
+              'status-menu-item',
+              `status-item-${opt.key}`,
+              isSelected && 'is-selected',
+              isFocused && 'is-focused'
+            )}
+            onClick={() => handleSelect(opt.key)}
+            onMouseEnter={() => setFocusedIndex(idx)}
+          >
+            <div className="status-item-leading">
+              <span className="status-item-glyph">{opt.symbol}</span>
+            </div>
+            <div className="status-item-text">
+              <span className="status-item-label">{opt.label}</span>
+              <span className="status-item-subtext">{opt.subtext}</span>
+            </div>
+            {isSelected ? (
+              <Check size={13} className="status-item-check" />
+            ) : null}
+          </button>
+        )
+      })}
+    </div>
+  ) : null
 
   return (
     <div
-      ref={anchorRef}
+      ref={triggerRef}
       className={cn('status-dropdown-anchor', open && 'is-open')}
       onKeyDown={handleKeyDown}
     >
       <button
         type="button"
         className={cn('status-dropdown-pill', `status-pill-${currentKey}`, open && 'active')}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={toggle}
         aria-haspopup="listbox"
         aria-expanded={open}
         title={`Sanctuary status: ${activeOption.label}. Click to toggle.`}
@@ -2821,49 +2932,7 @@ function SanctuaryStatusDropdown({ game, onStatusChange }) {
         <span className="status-pill-label">{activeOption.label}</span>
         <ChevronDown size={11} className={cn('status-pill-chevron', open && 'rotate-180')} />
       </button>
-
-      {open && (
-        <div
-          ref={menuRef}
-          role="listbox"
-          aria-label="Select Game Progress Status"
-          className="status-dropdown-menu"
-        >
-          <div className="status-menu-header">Sanctuary Status</div>
-          {SANCTUARY_STATUS_OPTIONS.map((opt, idx) => {
-            const isSelected = opt.key === currentKey
-            const isFocused = idx === focusedIndex
-            return (
-              <button
-                key={opt.key}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                tabIndex={-1}
-                className={cn(
-                  'status-menu-item',
-                  `status-item-${opt.key}`,
-                  isSelected && 'is-selected',
-                  isFocused && 'is-focused'
-                )}
-                onClick={() => handleSelect(opt.key)}
-                onMouseEnter={() => setFocusedIndex(idx)}
-              >
-                <div className="status-item-leading">
-                  <span className="status-item-glyph">{opt.symbol}</span>
-                </div>
-                <div className="status-item-text">
-                  <span className="status-item-label">{opt.label}</span>
-                  <span className="status-item-subtext">{opt.subtext}</span>
-                </div>
-                {isSelected ? (
-                  <Check size={13} className="status-item-check" />
-                ) : null}
-              </button>
-            )
-          })}
-        </div>
-      )}
+      {typeof document !== 'undefined' && menu ? createPortal(menu, document.body) : null}
     </div>
   )
 }
