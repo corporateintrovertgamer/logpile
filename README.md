@@ -64,12 +64,6 @@ Logpile is completely free and open-source software developed by independent dev
 - **Buy Me a Coffee**: [buymeacoffee.com/Corporateintrovertgamer](https://buymeacoffee.com/Corporateintrovertgamer)
 - **GitHub**: [github.com/corporateintrovertgamer](https://github.com/corporateintrovertgamer)
 
-### Crypto Donations
-- **BTC**: `bc1qcf9f3fd5q5n9gxkjz5fh74qgdv2dgryqkkdmlk`
-- **ETH**: `0xE3e9e4Dfb4c87B6101700c70F73790a903f92Ef0`
-- **USDT (ERC-20)**: `0xE3e9e4Dfb4c87B6101700c70F73790a903f92Ef0`
-- **SOL**: `F8aPJG3tUtbLHbhdfxeNFmcv8b2GK7anY3EmTr6CcHkS`
-
 ---
 
 ## Known Limitations
