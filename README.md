@@ -1,6 +1,5 @@
-<p align="center">
-  <img src="docs/social-preview.png" alt="Logpile Banner" width="100%">
-</p>
+<img width="1024" height="571" alt="social-preview" src="https://github.com/user-attachments/assets/5eb6f884-294d-4e16-bb28-f05a37eea270" />
+
 
 # Logpile Desktop — Version 1.0.0
 
@@ -11,6 +10,23 @@ An offline-first, local game library manager designed to organize, catalog, and 
 ## Welcome to Logpile v1.0.0
 
 Logpile is built for gamers who want a clean, unified interface for their entire library without corporate launchers getting in the way. Whether your games come from Steam, Epic Games, GOG, or standalone DRM-free installers, Logpile brings them together in one place with rich artwork and metadata.
+
+### In-App Screenshots
+
+<img width="1919" height="1029" alt="screen-library" src="https://github.com/user-attachments/assets/9104b954-015d-4785-bd03-13dc12480359" />
+<img width="1919" height="1027" alt="screen-roulette" src="https://github.com/user-attachments/assets/734066e0-463d-405c-88aa-b2795f44cfcc" />
+
+Dynamic UI themes
+
+<img width="1919" height="1033" alt="GOT - DC - Cinematic theme" src="https://github.com/user-attachments/assets/548a92bf-5e4b-4bcc-8661-6a70ca2d87da" />
+<img width="1919" height="1033" alt="MSM-Re - Kinetic theme" src="https://github.com/user-attachments/assets/b339b96b-5759-4b7e-8191-90118afb6127" />
+<img width="1919" height="1028" alt="Stray - Playfull theme" src="https://github.com/user-attachments/assets/4b4c456c-ace6-4d77-99b4-fbcaec0b8a93" />
+<img width="1920" height="1035" alt="TW3-Re - Atmospheric theme (Large)" src="https://github.com/user-attachments/assets/8cf21124-ea71-409a-ad0b-5f743d428b97" />
+<img width="1919" height="1031" alt="Valorant - Competetive theme" src="https://github.com/user-attachments/assets/162c30a0-971d-47b7-a883-2752424b61cb" />
+
+Game roulette
+[roulette-demo.webm](https://github.com/user-attachments/assets/a3610ff5-2637-41a3-a1ab-769caaf4997c)
+
 
 ### Key Features
 
@@ -71,7 +87,7 @@ Logpile is completely free and open-source software developed by independent dev
 - Windows only.
 - The installer is unsigned, so Windows SmartScreen shows a warning (see Installation).
 - Your SteamGridDB and IGDB keys are stored as plain text in the local database. Do not share your database or backup files.
-- Logpile currently runs on Electron 32, which no longer receives security updates. An upgrade is planned for version 1.0.1.
+- Logpile currently runs on Electron 32, which no longer receives security updates. An upgrade is planned for version 1.2.0.
 
 ---
 
